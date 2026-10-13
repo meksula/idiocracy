@@ -13,6 +13,7 @@ const TOOLS = [
   ['spawn', 'Spawn', 'Punkt, w którym pojawiają się nowe postacie.'],
   ['portal', 'Portal', 'Klik: dodaj/edytuj przejście do innej mapy.'],
   ['npc', 'NPC', 'Wybierz NPC z listy, potem kliknij na mapie.'],
+  ['mobs', 'Potwory', 'Przeciągnij prostokąt — obszar, w którym żyją potwory.'],
 ];
 
 export class MapEditor {
@@ -29,7 +30,7 @@ export class MapEditor {
   }
 
   async show() {
-    [this.tiles, this.maps, this.allNpcs] = await Promise.all([Editor.list('tiles', true), Editor.list('maps', true), Editor.list('npcs', true)]);
+    [this.tiles, this.maps, this.allNpcs, this.monsters] = await Promise.all([Editor.list('tiles', true), Editor.list('maps', true), Editor.list('npcs', true), Editor.list('monsters', true)]);
     this.tileMap = new Map(this.tiles.map(t => [t.code, t]));
     this.brush = this.brush || this.tiles.find(t => t.layer === 'GROUND')?.code;
     const code = this.map?.code && this.maps.some(m => m.code === this.map.code) ? this.map.code : this.maps[0]?.code;
@@ -43,7 +44,9 @@ export class MapEditor {
     this.npcs = structuredClone(this.allNpcs.filter(n => n.mapCode === code));
     this.dirty = false;
     this.dirtyNpcs.clear();
+    this.map.spawns = this.map.spawns || [];
     this.selectedPortal = null;
+    this.selectedSpawn = null;
     this.selectedNpc = null;
     this.render();
   }
@@ -109,7 +112,27 @@ export class MapEditor {
     const m = this.map;
     r.append(el('h3', { text: 'Właściwości' }),
       field('Nazwa lokacji', text(m, 'name', { onInput: () => this.setDirty() })),
+      el('label', { class: 'check' }, el('input', { type: 'checkbox', checked: !!m.instanced, onchange: (e) => { m.instanced = e.target.checked; this.setDirty(); } }), ' osobna kopia dla każdego gracza (instancja)'),
       el('div', { class: 'muted', text: `${m.width}×${m.height} · spawn [${m.spawnX}, ${m.spawnY}]` }));
+
+    r.append(el('h3', { text: `Potwory (${m.spawns.length} obsz.)` }));
+    m.spawns.forEach((sp, i) => {
+      const sel = this.selectedSpawn === i;
+      const tpl = this.monsters.find(x => x.code === sp.monster);
+      const row = el('div', { class: `portal-row ${sel ? 'sel' : ''}` },
+        el('div', { class: 'row', onclick: () => { this.selectedSpawn = sel ? null : i; this.renderRightContent(); this.draw(); } },
+          el('span', { class: 'neon-text', style: { color: 'var(--red)' }, text: `${sp.count}×` }),
+          el('span', { text: `${tpl ? tpl.name : sp.monster} [${sp.x},${sp.y} ${sp.w}×${sp.h}]` })));
+      if (sel) {
+        const ch = () => { this.setDirty(); this.draw(); };
+        row.append(el('div', { class: 'form-grid' },
+          field('Potwór', select(sp, 'monster', this.monsters.map(x => [x.code, `${x.name} [${x.level}]`]), { onInput: ch })),
+          field('Ile naraz', num(sp, 'count', { min: 1, onInput: ch }))),
+          el('button', { class: 'danger small', onclick: () => { m.spawns.splice(i, 1); this.selectedSpawn = null; this.setDirty(); this.renderRightContent(); this.draw(); } }, 'Usuń obszar'));
+      }
+      r.append(row);
+    });
+    if (!this.monsters.length) r.append(el('div', { class: 'hint', text: 'Najpierw stwórz potwora w zakładce „Potwory”.' }));
 
     r.append(el('h3', { text: `NPC na mapie (${this.npcs.length})` }));
     for (const n of this.npcs) {
@@ -243,6 +266,7 @@ export class MapEditor {
       if (!down) return;
       down = false;
       if (this.tool === 'rect' && this.rectStart && this.hover) this.fillRect(this.rectStart, this.hover);
+      if (this.tool === 'mobs' && this.rectStart && this.hover) this.addSpawn(this.rectStart, this.hover);
       this.rectStart = null;
       this.draw();
     };
@@ -288,6 +312,17 @@ export class MapEditor {
       } break;
       default: break;
     }
+  }
+
+  addSpawn(a, b) {
+    if (!this.monsters.length) { toast('Brak potworów — stwórz je w zakładce „Potwory”.', 'error'); return; }
+    const x = Math.max(0, Math.min(a.x, b.x)), y = Math.max(0, Math.min(a.y, b.y));
+    const w = Math.min(this.map.width - x, Math.abs(a.x - b.x) + 1), h = Math.min(this.map.height - y, Math.abs(a.y - b.y) + 1);
+    const prev = this.map.spawns[this.selectedSpawn ?? this.map.spawns.length - 1];
+    this.map.spawns.push({ monster: prev?.monster || this.monsters[0].code, x, y, w, h, count: Math.max(1, Math.round(w * h / 8)) });
+    this.selectedSpawn = this.map.spawns.length - 1;
+    this.setDirty();
+    this.renderRightContent();
   }
 
   fillRect(a, b) {
@@ -350,6 +385,22 @@ export class MapEditor {
       ctx.lineWidth = 2;
       ctx.strokeRect(p.x * ts + 1, p.y * ts + 1, ts - 2, ts - 2);
     });
+    (m.spawns || []).forEach((sp, i) => {
+      ctx.fillStyle = 'rgba(255,90,74,0.14)';
+      ctx.fillRect(sp.x * ts, sp.y * ts, sp.w * ts, sp.h * ts);
+      ctx.strokeStyle = i === this.selectedSpawn ? PALETTE.y : PALETTE.X;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(sp.x * ts + 1, sp.y * ts + 1, sp.w * ts - 2, sp.h * ts - 2);
+      ctx.setLineDash([]);
+      const tpl = this.monsters?.find(x => x.code === sp.monster);
+      if (tpl) {
+        ctx.drawImage(spriteCanvas(tpl.sprite, 0, this.zoom, `edm:${tpl.code}`), sp.x * ts, sp.y * ts);
+        ctx.font = '16px VT323, monospace';
+        ctx.fillStyle = PALETTE['7'];
+        ctx.fillText(`${sp.count}×`, sp.x * ts + ts + 2, sp.y * ts + 14);
+      }
+    });
     ctx.strokeStyle = PALETTE.m;
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(m.spawnX * ts + ts / 2, m.spawnY * ts + ts / 2, ts / 3, 0, Math.PI * 2); ctx.stroke();
@@ -362,7 +413,7 @@ export class MapEditor {
     if (this.hover && this.inb(this.hover.x, this.hover.y)) {
       ctx.strokeStyle = PALETTE['7'];
       ctx.lineWidth = 2;
-      if (this.tool === 'rect' && this.rectStart) {
+      if ((this.tool === 'rect' || this.tool === 'mobs') && this.rectStart) {
         const a = this.rectStart, b = this.hover;
         ctx.strokeRect(Math.min(a.x, b.x) * ts, Math.min(a.y, b.y) * ts, (Math.abs(a.x - b.x) + 1) * ts, (Math.abs(a.y - b.y) + 1) * ts);
       } else ctx.strokeRect(this.hover.x * ts + 1, this.hover.y * ts + 1, ts - 2, ts - 2);

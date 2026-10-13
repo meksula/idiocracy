@@ -33,6 +33,11 @@ public class GameMap implements ContentEntity {
     private List<Portal> portals = new ArrayList<>();
     @Column(name = "updated_at")
     private Instant updatedAt = Instant.now();
+    /** Kazdy gracz dostaje wlasna kopie mapy (np. mieszkanie startowe). */
+    private boolean instanced;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<MonsterSpawn> spawns = new ArrayList<>();
 
     @Override
     public void validate() {
@@ -51,6 +56,12 @@ public class GameMap implements ContentEntity {
         for (Portal p : portals) {
             if (!inBounds(p.x(), p.y())) {
                 throw new IllegalArgumentException("Portal poza mapą: " + p.x() + "," + p.y());
+            }
+        }
+        for (MonsterSpawn sp : spawns) {
+            if (sp.monster() == null || sp.count() < 1 || sp.w() < 1 || sp.h() < 1
+                    || !inBounds(sp.x(), sp.y()) || !inBounds(sp.x() + sp.w() - 1, sp.y() + sp.h() - 1)) {
+                throw new IllegalArgumentException("Nieprawidłowy obszar potworów: " + sp.monster());
             }
         }
         updatedAt = Instant.now();
@@ -86,5 +97,9 @@ public class GameMap implements ContentEntity {
     public List<Portal> getPortals() { return portals; }
     public void setPortals(List<Portal> portals) { this.portals = portals == null ? new ArrayList<>() : portals; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public boolean isInstanced() { return instanced; }
+    public void setInstanced(boolean instanced) { this.instanced = instanced; }
+    public List<MonsterSpawn> getSpawns() { return spawns; }
+    public void setSpawns(List<MonsterSpawn> spawns) { this.spawns = spawns == null ? new ArrayList<>() : spawns; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }

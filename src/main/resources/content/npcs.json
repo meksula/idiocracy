@@ -62,5 +62,29 @@
       "feet": "b"
     },
     "greeting": "Ruiny Galerii. Kiedyś ludzie przychodzili tu kupować rzeczy, których nie potrzebowali. Teraz my przychodzimy po rzeczy, których potrzebujemy."
+  },
+  {
+    "code": "nieznajomy",
+    "name": "Zakapturzony mężczyzna",
+    "mapCode": "podworze",
+    "x": 13,
+    "y": 10,
+    "dir": "W",
+    "appearance": {
+      "skin": "S",
+      "hair": "2",
+      "eyes": "0",
+      "primary": "2",
+      "secondary": "1",
+      "feet": "0"
+    },
+    "greeting": "* Mężczyzna nie odrywa wzroku od robota. Udaje, że cię nie widzi.",
+    "visibility": {
+      "quest": "cisza-po-burzy",
+      "fromStep": 0,
+      "toStep": 1,
+      "fleeX": 26,
+      "fleeY": 15
+    }
   }
 ]

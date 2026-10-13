@@ -26,6 +26,6 @@ game:
   first-account-admin: true
   max-characters-per-account: 5
   starting-ccoin: 25
-  start-map: osada
+  start-map: dom
   base-move-delay-ms: 260
   save-interval-ms: 15000

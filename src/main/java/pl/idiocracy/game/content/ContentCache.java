@@ -26,7 +26,8 @@ public class ContentCache {
             Map<String, Npc> npcs,
             Map<String, List<Npc>> npcsByMap,
             Map<String, Quest> quests,
-            Map<String, List<Quest>> questsByGiver) {
+            Map<String, List<Quest>> questsByGiver,
+            Map<String, MonsterTemplate> monsters) {
     }
 
     private final TileDefRepository tiles;
@@ -36,12 +37,13 @@ public class ContentCache {
     private final GameMapRepository maps;
     private final NpcRepository npcs;
     private final QuestRepository quests;
+    private final MonsterTemplateRepository monsters;
 
     private volatile Snapshot snapshot;
 
     public ContentCache(TileDefRepository tiles, RaceRepository races, CharacterClassRepository classes,
                         ItemTemplateRepository items, GameMapRepository maps, NpcRepository npcs,
-                        QuestRepository quests) {
+                        QuestRepository quests, MonsterTemplateRepository monsters) {
         this.tiles = tiles;
         this.races = races;
         this.classes = classes;
@@ -49,6 +51,7 @@ public class ContentCache {
         this.maps = maps;
         this.npcs = npcs;
         this.quests = quests;
+        this.monsters = monsters;
     }
 
     @Transactional(readOnly = true)
@@ -66,7 +69,8 @@ public class ContentCache {
                 allNpcs.stream().collect(Collectors.groupingBy(Npc::getMapCode)),
                 index(allQuests, Quest::getCode),
                 allQuests.stream().filter(q -> q.getGiverNpc() != null)
-                        .collect(Collectors.groupingBy(Quest::getGiverNpc)));
+                        .collect(Collectors.groupingBy(Quest::getGiverNpc)),
+                index(monsters.findAll(), MonsterTemplate::getCode));
     }
 
     public Snapshot get() {
@@ -92,6 +96,10 @@ public class ContentCache {
 
     public Optional<Npc> npc(String code) {
         return Optional.ofNullable(get().npcs().get(code));
+    }
+
+    public Optional<MonsterTemplate> monster(String code) {
+        return Optional.ofNullable(get().monsters().get(code));
     }
 
     public List<Npc> npcsOn(String mapCode) {

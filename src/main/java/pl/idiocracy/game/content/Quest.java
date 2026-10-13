@@ -35,6 +35,9 @@ public class Quest implements ContentEntity {
     private QuestDialog dialog = new QuestDialog("", "", "");
     @Column(name = "sort_order")
     private int sortOrder;
+    /** Misja przydzielana sama (np. wprowadzenie po pierwszym wejsciu do gry). */
+    @Column(name = "auto_start")
+    private boolean autoStart;
 
     @Override
     public void validate() {
@@ -77,4 +80,6 @@ public class Quest implements ContentEntity {
     public void setDialog(QuestDialog dialog) { this.dialog = dialog == null ? new QuestDialog("", "", "") : dialog; }
     public int getSortOrder() { return sortOrder; }
     public void setSortOrder(int sortOrder) { this.sortOrder = sortOrder; }
+    public boolean isAutoStart() { return autoStart; }
+    public void setAutoStart(boolean autoStart) { this.autoStart = autoStart; }
 }

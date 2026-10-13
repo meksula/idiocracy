@@ -763,5 +763,140 @@
     ]
    ]
   }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": "WEAPON",
+  "code": "noz-kuchenny",
+  "name": "Nóż kuchenny",
+  "type": "WEAPON",
+  "rarity": "COMMON",
+  "description": "Zwykły nóż z szuflady. Jeszcze niedawno kroiło się nim chleb.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 3,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 5,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "............0...",
+     "...........060..",
+     "..........0650..",
+     ".........0600...",
+     ".........0560...",
+     "........0560....",
+     ".......0560.....",
+     "......0560......",
+     ".....0560.......",
+     "....0560........",
+     "...0b60.........",
+     "..0B60..........",
+     ".0b00...........",
+     "0b0.............",
+     ".0.............."
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": null,
+  "code": "plytka-neuronowa",
+  "name": "Płytka neuronowa",
+  "type": "QUEST",
+  "rarity": "RARE",
+  "description": "Płytka wielkości karty, wyjęta z robota serwisowego. Wciąż ciepła. Na krawędzi co jakiś czas mruga zielony punkt.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 0,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "...0000000000...",
+     "..0GGGGGGGGG10..",
+     "..0GggggggOl10..",
+     "..0GOOOOOgOg10..",
+     "..0Ggg111gOg10..",
+     "..0Ggg111gOg10..",
+     "..0GOOOgggOg10..",
+     "..0Ggggggggg10..",
+     "..011111111110..",
+     "...0O0O0O0O00...",
+     "....0.0.0.0.....",
+     "................",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": true,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": null,
+  "code": "ogon-szczura",
+  "name": "Ogon szczura",
+  "type": "JUNK",
+  "rarity": "COMMON",
+  "description": "Długi, łysy ogon zmutowanego szczura. Skóra ma zielonkawe przebarwienia.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 1,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     ".............0..",
+     "............0s0.",
+     "............0S0.",
+     "...........0S0..",
+     "...........0S0..",
+     "......00..0G0...",
+     "....00SG000S0...",
+     "...0SS00SSS0....",
+     ".00S00..000.....",
+     "0BB0............",
+     "0BB0............",
+     ".00.............",
+     "................"
+    ]
+   ]
+  }
  }
 ]

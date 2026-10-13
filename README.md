@@ -6,8 +6,8 @@
 
 Przeglądarkowy MMORPG 2D w duchu Tibii / Margonem. Ten etap to **silnik i szablon pod rozbudowę**,
 nie gotowa treść: logowanie, kreator postaci, świat ze sterowaniem autorytatywnym po stronie serwera,
-multiplayer, NPC, silnik misji, ekwipunek i **edytor świata w przeglądarce** (mapy, misje, NPC,
-przedmioty, kafelki, rasy, klasy).
+multiplayer, NPC, silnik misji, **system walki**, ekwipunek i **edytor świata w przeglądarce**
+(mapy, misje, NPC, potwory, przedmioty, kafelki, rasy, klasy).
 
 ## Szybki start
 
@@ -22,6 +22,8 @@ mvn spring-boot:run           # serwer na http://localhost:8080
 2. **Pierwsze konto dostaje rolę ADMIN** i widzi przycisk „Edytor świata”.
    Dodatkowych adminów ustawisz zmienną `ADMIN_EMAILS=a@b.pl,c@d.pl`.
 3. Stwórz postać i graj. Druga karta/przeglądarka = drugi gracz.
+
+Nowe postacie zaczynają na mapie `game.start-map` (domyślnie `dom` — mieszkanie gracza).
 
 Konfiguracja przez zmienne środowiskowe: `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`
 (min. 32 znaki — **zmień na produkcji**), `ADMIN_EMAILS`, `PORT`. Reszta w `application.yml` (`game.*`).
@@ -38,7 +40,8 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--spring.web.resources.static-l
 |---|---|
 | WASD / strzałki | ruch |
 | klik na mapie | idź tam (A\*) |
-| klik na NPC / `E` | rozmowa |
+| klik na NPC / `E` | rozmowa (`Spacja` — dalej) |
+| klik na wroga / `Spacja` | atak — postać sama podchodzi i walczy; `Esc` przerywa |
 | `Enter` | czat lokalny (`/who`, `/pos`, `/help`) |
 | `Alt` | pokaż imiona NPC |
 | klik w przedmiot | załóż / użyj / zdejmij |
@@ -55,8 +58,15 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--spring.web.resources.static-l
 - **Ruch**: serwer autorytatywny (kolizje, tempo kroku z Zręczności, portale), klient przewiduje
   ruch lokalnie i płynnie interpoluje innych graczy; serwer koryguje oszustwa i desynchronizację.
 - **Multiplayer**: WebSocket, gracze widzą się na mapie, czat lokalny z dymkami.
-- **Misje**: kroki `TALK` / `VISIT` / `COLLECT` / `KILL` (KILL czeka na system walki), nagrody
-  c-coin/XP/przedmioty, misje powtarzalne, wymagany poziom, dziennik i markery nad NPC.
+- **Misje**: kroki `TALK` / `VISIT` / `COLLECT` / `KILL`, przedmioty wręczane po kroku, nagrody
+  c-coin/XP/przedmioty, misje powtarzalne i startujące automatycznie, wymagany poziom, dziennik
+  i markery nad NPC. Rozmowy wieloetapowe z narracją (`* …`), kwestiami gracza (`> …`) i postaci (`Imię: …`).
+- **Walka**: potwory jako treść z edytora (HP, atak, obrona, tempo, agresja, zasięg wykrycia,
+  łup, c-coin, XP, czas odrodzenia), obszary występowania na mapach, AI (wędrówka, pościg, smycz),
+  automatyczny atak w zwarciu na wybrany cel, liczby obrażeń, paski HP, ramka celu, regeneracja
+  poza walką, utrata przytomności i pobudka w punkcie startowym mapy.
+- **Fabuła**: mapy instancjonowane (każdy gracz ma własne mieszkanie), NPC widoczni tylko na danym
+  etapie misji, którzy po rozmowie uciekają (animacja biegu do wskazanego punktu).
 - **Ekwipunek**: 7 slotów, plecak, przedmioty do użycia (leczenie), stosy, wymagany poziom,
   zakładane ubrania **zmieniają wygląd postaci** (pole „kolor na postaci”).
 - **Waluta**: tylko **c-coin**.
@@ -82,8 +92,16 @@ pusta). Potem źródłem prawdy jest baza i edytor.
 - `tiles.json`, `items.json`, `maps/*.json` — generowane skryptem z prymitywów rysunkowych:
   `node tools/gen-content.mjs --ascii` (`--ascii` drukuje podgląd przechodności map).
 
-Startowo: Osada Reboot i Ruiny Galerii Handlowej, 4 NPC, 3 misje (w tym łańcuch „Pierwsze myśli”
-→ „Złom za c-coiny” (powtarzalna) → „Prąd z niczego”), 17 przedmiotów, 37 kafelków.
+Startowo: mieszkanie gracza, Podwórze kamienicy, Osada Reboot i Ruiny Galerii Handlowej, 5 NPC,
+1 potwór, 4 misje, 20 przedmiotów, 45 kafelków.
+
+**Początek gry — „Cisza po burzy”**: postać budzi się we własnym mieszkaniu dziewięć dni po burzy.
+Na podwórzu leżą martwe roboty serwisowe, a między nimi zakapturzony mężczyzna wykręca z nich płytki.
+Po krótkiej rozmowie ucieka między śmietniki, gdzie zalęgły się zmutowane szczury (poziom 1).
+Trop prowadzi do Osady Reboot.
+
+Seeder dodaje elementy, których kodu nie ma w bazie, i niczego nie nadpisuje — nowa treść z kolejnych
+wersji trafia do istniejących baz, a zmiany z edytora są bezpieczne.
 
 ## Testy
 
@@ -93,10 +111,10 @@ mvn verify                                  # + test integracyjny (Testcontainer
 TEST_DB_URL=jdbc:postgresql://localhost:5432/idiocracy_test mvn verify   # albo na własnej bazie
 ```
 
-Test integracyjny przechodzi pełną ścieżkę: rejestracja → postać → WebSocket → ruch → rozmowa → misja → korekta serwera.
+Test integracyjny przechodzi pełną ścieżkę: rejestracja → postać → WebSocket → intro → wyjście z mieszkania → rozmowa z nieznajomym (znika) → korekta serwera.
 
 ## Dalej
 
 Architektura i protokół: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Naturalne kolejne kroki:
-system walki (potwory, hook `QuestEngine.onKill` już jest), sklepy NPC za c-coiny, handel między
-graczami, przedmioty leżące na mapie, kanały czatu, lore.
+umiejętności klas (np. Intelekt dla Bibliotekarza), walka dystansowa (Kurier), sklepy NPC za c-coiny,
+przedmioty leżące na mapie, handel między graczami, drużyny, kanały czatu, lore.

@@ -107,4 +107,22 @@ export const ITEMS = [
     stats: st(), price: 0,
     icon: S(g => { g.rect(3, 2, 10, 12, 'x').vline(3, 2, 12, 'r').rect(5, 2, 8, 12, 'x'); g.rect(12, 3, 1, 10, '6'); g.rect(6, 4, 5, 2, 'O').hline(6, 8, 5, 'R'); g.hline(4, 13, 9, '6'); }),
   },
+  {
+    code: 'noz-kuchenny', name: 'Nóż kuchenny', type: 'WEAPON', slot: 'WEAPON', rarity: 'COMMON',
+    description: 'Zwykły nóż z szuflady. Jeszcze niedawno kroiło się nim chleb.',
+    stats: st({ attack: 3 }), price: 5,
+    icon: S(g => { g.line(3, 12, 10, 5, '5').line(4, 12, 11, 5, '6').line(10, 4, 12, 2, '6').set(12, 3, '5'); g.line(2, 13, 4, 11, 'b').line(1, 14, 3, 12, 'b').set(3, 12, 'B'); }),
+  },
+  {
+    code: 'plytka-neuronowa', name: 'Płytka neuronowa', type: 'QUEST', rarity: 'RARE',
+    description: 'Płytka wielkości karty, wyjęta z robota serwisowego. Wciąż ciepła. Na krawędzi co jakiś czas mruga zielony punkt.',
+    stats: st(), price: 0,
+    icon: S(g => { g.rect(3, 4, 10, 8, 'g').bevel(3, 4, 10, 8, 'G', '1'); g.hline(4, 6, 5, 'O').hline(4, 9, 3, 'O').vline(10, 5, 5, 'O'); g.rect(6, 7, 3, 2, '1').set(11, 5, 'l'); for (let x = 4; x < 12; x += 2) g.set(x, 12, 'O'); }),
+  },
+  {
+    code: 'ogon-szczura', name: 'Ogon szczura', type: 'JUNK', rarity: 'COMMON', stackable: true,
+    description: 'Długi, łysy ogon zmutowanego szczura. Skóra ma zielonkawe przebarwienia.',
+    stats: st(), price: 1,
+    icon: S(g => { g.line(2, 12, 6, 9, 'S').line(6, 9, 10, 10, 'S').line(10, 10, 13, 5, 'S').set(13, 4, 's'); g.set(7, 9, 'G').set(11, 8, 'G'); g.rect(1, 12, 2, 2, 'B'); }),
+  },
 ].map(i => ({ stackable: false, minLevel: 1, wearColor: null, slot: null, ...i }));

@@ -3,7 +3,7 @@ import { requireSession, logout } from '../api.js';
 import { el } from '../ui.js';
 import { PALETTE, PALETTE_GROUPS, SHADE } from '../palette.js';
 import { MapEditor } from './map-editor.js';
-import { tilesTab, itemsTab, npcsTab, racesTab, classesTab, questsTab, resetEditors } from './forms.js';
+import { tilesTab, itemsTab, npcsTab, racesTab, classesTab, questsTab, monstersTab, resetEditors } from './forms.js';
 
 const s = requireSession();
 if (s.role !== 'ADMIN') {
@@ -17,6 +17,7 @@ const TABS = [
   ['maps', 'Mapy', () => new MapEditor()],
   ['quests', 'Misje', questsTab],
   ['npcs', 'NPC', npcsTab],
+  ['monsters', 'Potwory', monstersTab],
   ['items', 'Przedmioty', itemsTab],
   ['tiles', 'Kafelki', tilesTab],
   ['races', 'Rasy', racesTab],
@@ -45,6 +46,10 @@ for (const [id, label] of TABS) {
   nav.append(b);
 }
 open(location.hash.slice(1) || 'maps');
+addEventListener('hashchange', () => {
+  const id = location.hash.slice(1);
+  if (id && !nav.querySelector(`button.active[data-id="${id}"]`)) open(id);
+});
 
 function styleGuide() {
   const pal = el('div', { class: 'style-palette' });
@@ -76,7 +81,7 @@ Zwróć JSON: {"w":16,"h":16,"frames":[[16 wierszy po 16 znaków]]}`;
         el('li', { text: 'Maks. 3–4 odcienie na jeden obiekt. Mniej = czytelniej.' }),
         el('li', { text: 'Świat jest zmęczony: szarości, rdza, zgniła zieleń. Neon (c C n) = technologia/AI, róż i fiolet (p P m) = anomalie, luksus, niebezpieczeństwo.' }),
         el('li', { text: 'Postacie są składane automatycznie z szablonu — rasa daje skórę i oczy, klasa strój, a przedmiot z „kolorem na postaci” przemalowuje odpowiednią część.' }),
-        el('li', { text: 'Humor w nazwach i opisach: ludzkość zapomniała, jak działają proste rzeczy.' }))),
+        el('li', { text: 'Potwory: sprite zwrócony w prawo, 2 klatki chodu; gra sama odbija go przy ruchu w lewo.' }))),
     el('div', { class: 'panel' },
       el('h2', { text: 'Projektowanie z Claude' }),
       el('p', { text: 'Skopiuj ten prompt, uzupełnij opis przedmiotu i wklej odpowiedź w „Import / eksport tekstowy” pod edytorem pikseli.' }),

@@ -69,6 +69,14 @@
     #dialog .d-head canvas { background: #08090c; border: 2px solid var(--line); }
     #dialog .d-name { color: var(--amber); font-size: 28px; letter-spacing: 1px; }
     #dialog .d-body p { margin: 8px 0; font-size: 21px; color: var(--text-hi); }
+    #dialog .d-body { max-height: 46vh; overflow-y: auto; }
+    #dialog .d-body p.narration { color: var(--muted); font-style: italic; }
+    #dialog .d-body p.me-line { color: var(--neon); }
+    #dialog .d-body .speaker { color: var(--amber); }
+    #dialog.narrator { border-color: var(--line-2); }
+    #dialog.narrator .d-name { color: var(--text-hi); }
+    #target-frame { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 260px; background: rgba(13,14,18,.9); border: 2px solid var(--red-dim); padding: 4px 10px 8px; z-index: 6; text-align: center; }
+    #target-frame .t-name { color: var(--red); font-size: 20px; }
     #dialog .d-opts { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
     #dialog .d-opts button { justify-content: flex-start; text-transform: none; }
 
@@ -103,6 +111,7 @@
         <canvas id="world" class="pixel"></canvas>
         <canvas id="minimap" width="200" height="150" title="Minimapa"></canvas>
         <div id="dialog" class="hidden"></div>
+        <div id="target-frame" class="hidden"></div>
       </div>
       <div id="chat" class="panel">
         <span class="panel-title">Kanał lokalny</span>
@@ -143,15 +152,16 @@
 
 <div id="help" class="modal hidden">
   <div class="panel rust">
-    <span class="panel-title">Instrukcja dla nie-myślących</span>
+    <span class="panel-title">Sterowanie</span>
     <table class="keys">
       <tr><td>WASD / strzałki</td><td>ruch</td></tr>
       <tr><td>Klik na mapie</td><td>idź tam (szuka drogi sam — ty nie musisz)</td></tr>
       <tr><td>Klik na NPC / E</td><td>rozmowa z najbliższą osobą</td></tr>
+      <tr><td>Klik na wroga / Spacja</td><td>atak (postać sama podejdzie i walczy)</td></tr>
+      <tr><td>Esc</td><td>przerwij atak / zamknij okno</td></tr>
       <tr><td>Enter</td><td>czat lokalny (/help — komendy)</td></tr>
       <tr><td>Alt (przytrzymaj)</td><td>pokaż imiona NPC</td></tr>
       <tr><td>Klik w przedmiot</td><td>załóż / użyj / zdejmij</td></tr>
-      <tr><td>Esc</td><td>zamknij okno</td></tr>
     </table>
     <p class="muted">„!” nad głową — ta osoba ma dla ciebie misję. „?” — czeka na ciebie w ramach misji. Turkusowe pola — przejścia do innych lokacji.</p>
   </div>

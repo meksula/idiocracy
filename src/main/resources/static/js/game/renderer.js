@@ -13,6 +13,7 @@ export class Renderer {
     this.game = game;
     this.cam = { x: 0, y: 0 };
     this.hover = null;
+    this.flipped = new Map();
     this.resize(720, 528);
   }
 
@@ -91,6 +92,20 @@ export class Renderer {
     // 4. obiekty + postacie, rzad po rzedzie (prosty y-sort)
     const ents = [];
     for (const n of map.npcs) ents.push({ kind: 'npc', e: n, x: n.x, y: n.y });
+    for (const mo of game.monsters.values()) { const r = game.renderPos(mo, now); ents.push({ kind: 'monster', e: mo, ...r }); }
+    for (const n of game.pendingFlee) ents.push({ kind: 'ghost', e: n, x: n.x, y: n.y, alpha: 1, frame: 0 });
+    for (const gh of game.ghosts) {
+      if (gh.kind === 'flee') {
+        const t = Math.max(0, Math.min(1, (now - gh.start) / (gh.until - gh.start)));
+        const f = t * (gh.points.length - 1);
+        const i = Math.min(gh.points.length - 2, Math.floor(f));
+        const a = gh.points[i], b = gh.points[i + 1], k = f - i;
+        const alpha = t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3;
+        ents.push({ kind: 'ghost', e: { ...gh.e, dir: b.dir }, x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, alpha, frame: Math.floor(now / 90) % 2 ? 1 : 2 });
+      } else {
+        ents.push({ kind: 'corpse', e: gh.e, x: gh.e.x, y: gh.e.y, alpha: Math.min(1, 1 - (now - gh.start) / (gh.until - gh.start)) });
+      }
+    }
     for (const p of game.players.values()) { const r = game.renderPos(p, now); ents.push({ kind: 'player', e: p, ...r }); }
     const mp = game.renderPos(game.me, now);
     ents.push({ kind: 'me', e: game.me, ...mp });
@@ -106,8 +121,9 @@ export class Renderer {
       while (ei < ents.length && Math.ceil(ents[ei].y - 0.001) <= y) this.drawEntity(ents[ei++], now, sx, sy);
     }
     while (ei < ents.length) this.drawEntity(ents[ei++], now, sx, sy);
-    // 5. nazwy, markery, dymki - zawsze na wierzchu
-    for (const en of ents) this.drawOverlay(en, now, sx, sy);
+    // 5. nazwy, markery, paski HP, dymki - zawsze na wierzchu
+    for (const en of ents) if (en.kind !== 'ghost' && en.kind !== 'corpse') this.drawOverlay(en, now, sx, sy);
+    this.drawFloats(now);
     // 6. winieta
     const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.85);
     g.addColorStop(0, 'rgba(0,0,0,0)');
@@ -116,12 +132,54 @@ export class Renderer {
     ctx.fillRect(0, 0, W, H);
   }
 
+  monsterCanvas(e, frame) {
+    const tpl = this.game.monsterTpl.get(e.code);
+    if (!tpl) return null;
+    const c = spriteCanvas(tpl.sprite, frame, this.scale, `mon:${e.code}:${this.game.contentVersion}`);
+    if (e.dir !== 'W') return c;
+    const key = `mon:${e.code}:${this.game.contentVersion}:${frame}:${this.scale}:W`;
+    let f = this.flipped.get(key);
+    if (!f) {
+      f = document.createElement('canvas');
+      f.width = c.width; f.height = c.height;
+      const fx = f.getContext('2d');
+      fx.translate(c.width, 0); fx.scale(-1, 1); fx.drawImage(c, 0, 0);
+      this.flipped.set(key, f);
+    }
+    return f;
+  }
+
   drawEntity(en, now, sx, sy) {
     const { e } = en;
+    const ctx = this.ctx;
+    const px = Math.round(en.x * this.ts - this.cam.x), py = Math.round(en.y * this.ts - this.cam.y);
+    if (en.kind === 'monster' || en.kind === 'corpse') {
+      if (en.kind === 'monster' && this.game.target === e.id) {
+        ctx.strokeStyle = PALETTE.X;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(px + 1, py + 1, this.ts - 2, this.ts - 2);
+      }
+      const moving = en.kind === 'monster' && this.game.isMoving(e, now);
+      const c = this.monsterCanvas(e, moving ? (Math.floor(now / 120) % 2) : 0);
+      if (!c) return;
+      ctx.save();
+      if (en.kind === 'corpse') { ctx.globalAlpha = Math.max(0, en.alpha); ctx.filter = 'grayscale(1) brightness(0.6)'; }
+      const flash = en.kind === 'monster' && e.hitAt && now - e.hitAt < 120;
+      if (flash) ctx.filter = 'brightness(2.2)';
+      ctx.drawImage(c, px, py);
+      ctx.restore();
+      return;
+    }
+    if (en.kind === 'ghost') {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, en.alpha);
+      ctx.drawImage(characterCanvas(e.app, e.dir, en.frame, this.scale), px, py - this.scale * 2);
+      ctx.restore();
+      return;
+    }
     const frame = en.kind === 'npc' ? 0 : this.game.walkFrame(e, now);
     const dir = en.kind === 'npc' ? (e.dir || 'S') : e.dir;
     const c = characterCanvas(e.app, dir, frame, this.scale);
-    const px = Math.round(en.x * this.ts - this.cam.x), py = Math.round(en.y * this.ts - this.cam.y);
     this.ctx.fillStyle = 'rgba(0,0,0,0.35)';
     this.ctx.fillRect(px + 12, py + this.ts - 6, this.ts - 24, 4);
     this.ctx.drawImage(c, px, py - this.scale * 2);
@@ -136,9 +194,14 @@ export class Renderer {
     ctx.lineWidth = 3;
     ctx.strokeStyle = '#000';
     const label = en.kind === 'npc' ? e.name : `${e.name} [${e.level}]`;
-    ctx.fillStyle = en.kind === 'npc' ? PALETTE.O : en.kind === 'me' ? PALETTE.n : PALETTE['6'];
-    const hovered = this.hover && en.kind === 'npc' && this.hover.x === e.x && this.hover.y === e.y;
-    if (en.kind !== 'npc' || hovered || this.game.showNames) {
+    ctx.fillStyle = en.kind === 'npc' ? PALETTE.O : en.kind === 'monster' ? PALETTE.X : en.kind === 'me' ? PALETTE.n : PALETTE['6'];
+    const hovered = this.hover && (en.kind === 'npc' || en.kind === 'monster') && this.hover.x === e.x && this.hover.y === e.y;
+    const targeted = en.kind === 'monster' && this.game.target === e.id;
+    const hurt = e.maxHp && e.hp < e.maxHp;
+    if (en.kind === 'monster' && (hurt || targeted || hovered)) this.drawHpBar(px, py + 2, e.hp, e.maxHp);
+    else if ((en.kind === 'me' || en.kind === 'player') && hurt) this.drawHpBar(px, py + 2, e.hp, e.maxHp);
+    const quiet = en.kind === 'npc' || en.kind === 'monster';
+    if (!quiet || hovered || targeted || this.game.showNames) {
       ctx.strokeText(label, px, py);
       ctx.fillText(label, px, py);
     }
@@ -155,6 +218,35 @@ export class Renderer {
       }
     }
     if (e.bubble && e.bubble.until > now) this.drawBubble(e.bubble.text, px, py - 22);
+  }
+
+  drawHpBar(cx, y, hp, max) {
+    const { ctx } = this;
+    const w = Math.round(this.ts * 0.7), h = 5;
+    const x = Math.round(cx - w / 2);
+    const f = Math.max(0, Math.min(1, hp / Math.max(1, max)));
+    ctx.fillStyle = '#000';
+    ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
+    ctx.fillStyle = f > 0.5 ? PALETTE.l : f > 0.25 ? PALETTE.O : PALETTE.X;
+    ctx.fillRect(x, y, Math.round(w * f), h);
+  }
+
+  drawFloats(now) {
+    const { ctx } = this;
+    ctx.font = '22px VT323, monospace';
+    ctx.textAlign = 'center';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#000';
+    for (const f of this.game.floats) {
+      const t = (now - f.start) / 1000;
+      const x = f.x * this.ts - this.cam.x + this.ts / 2;
+      const y = f.y * this.ts - this.cam.y + this.ts / 3 - t * this.ts * 0.8;
+      ctx.globalAlpha = Math.max(0, 1 - t * t);
+      ctx.fillStyle = PALETTE[f.color] || PALETTE.y;
+      ctx.strokeText(f.text, x, y);
+      ctx.fillText(f.text, x, y);
+    }
+    ctx.globalAlpha = 1;
   }
 
   drawBubble(text, cx, bottom) {
@@ -200,6 +292,8 @@ export function drawMinimap(canvas, game) {
   }
   ctx.fillStyle = PALETTE.O;
   for (const n of map.npcs) ctx.fillRect(ox + n.x * s, oy + n.y * s, s, s);
+  ctx.fillStyle = PALETTE.x;
+  for (const mo of game.monsters.values()) ctx.fillRect(ox + mo.x * s, oy + mo.y * s, s, s);
   ctx.fillStyle = PALETTE['6'];
   for (const p of game.players.values()) ctx.fillRect(ox + p.x * s, oy + p.y * s, s, s);
   ctx.fillStyle = PALETTE.n;

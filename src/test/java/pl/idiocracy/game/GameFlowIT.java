@@ -86,46 +86,63 @@ class GameFlowIT {
         }, null, URI.create("ws://localhost:" + port + "/ws/game?token=" + token + "&character=" + characterId)).get(5, TimeUnit.SECONDS);
 
         JsonNode welcome = await(inbox, "welcome");
-        assertThat(welcome.at("/map/code").asText()).isEqualTo("osada");
+        assertThat(welcome.at("/map/code").asText()).isEqualTo("dom");
         assertThat(welcome.at("/you/name").asText()).isEqualTo(name);
         assertThat(welcome.get("inventory").toString()).contains("rura-stalowa");
-        int x = welcome.at("/you/x").asInt();
-        int y = welcome.at("/you/y").asInt();
+        assertThat(welcome.get("quests").toString()).contains("cisza-po-burzy");
+        JsonNode intro = await(inbox, "dialog");
+        assertThat(intro.get("lines").toString()).contains("Od burzy");
 
-        // spawn (20,17) -> soltys stoi na (18,13): idziemy 3 pola na polnoc
-        for (int i = 0; i < 3; i++) {
-            send(ws, Map.of("t", "move", "dir", "N", "seq", i));
-            Thread.sleep(300);
-        }
+        // mieszkanie: (2,3) -> drzwi (6,8) -> podworze
+        walk(ws, "E", 4);
+        walk(ws, "S", 5);
+        JsonNode enter = await(inbox, "enter");
+        assertThat(enter.at("/map/code").asText()).isEqualTo("podworze");
+        assertThat(enter.at("/map/npcs").toString()).contains("nieznajomy");
+        assertThat(enter.at("/you/x").asInt()).isEqualTo(8);
+        assertThat(await(inbox, "inventory").toString()).contains("noz-kuchenny");
+
+        // podejdz do nieznajomego (13,10) na (11,9)
+        walk(ws, "E", 3);
+        walk(ws, "S", 4);
         assertThat(inbox.stream().noneMatch(m -> m.path("t").asText().equals("correct"))).isTrue();
-
-        send(ws, Map.of("t", "talk", "npc", "soltys-zenon"));
+        inbox.removeIf(m -> m.path("t").asText().equals("npcs") || m.path("t").asText().equals("quests"));
+        send(ws, Map.of("t", "talk", "npc", "nieznajomy"));
         JsonNode dialog = await(inbox, "dialog");
-        assertThat(dialog.get("offers").toString()).contains("pierwsze-mysli");
+        assertThat(dialog.get("lines").toString()).contains("Nie podchodź");
+        JsonNode npcs = await(inbox, "npcs");
+        assertThat(npcs.get("npcs").toString()).doesNotContain("nieznajomy");
+        assertThat(await(inbox, "quests").toString()).contains("KILL");
 
-        send(ws, Map.of("t", "accept", "quest", "pierwsze-mysli", "npc", "soltys-zenon"));
-        JsonNode quests = await(inbox, "quests");
-        assertThat(quests.get("quests").toString()).contains("ACTIVE");
-
-        // dwa kroki naraz: drugi za szybko i w terminal AI na (20,12) -> korekta serwera
+        // dwa kroki naraz: drugi za szybko -> korekta serwera
         send(ws, Map.of("t", "move", "dir", "N", "seq", 99));
         send(ws, Map.of("t", "move", "dir", "N", "seq", 100));
-        assertThat(await(inbox, "correct").get("y").asInt()).isEqualTo(y - 4);
-        assertThat(x).isEqualTo(20);
+        assertThat(await(inbox, "correct").get("seq").asInt()).isEqualTo(100);
         ws.close();
+    }
+
+    private void walk(WebSocketSession ws, String dir, int steps) throws Exception {
+        for (int i = 0; i < steps; i++) {
+            send(ws, Map.of("t", "move", "dir", dir, "seq", i));
+            Thread.sleep(300);
+        }
     }
 
     private void send(WebSocketSession ws, Object msg) throws Exception {
         ws.sendMessage(new TextMessage(mapper.writeValueAsString(msg)));
     }
 
+    /** Czeka na najblizsza wiadomosc danego typu; pozostale zostaja w kolejce. */
     private static JsonNode await(BlockingQueue<JsonNode> inbox, String type) throws InterruptedException {
         long deadline = System.currentTimeMillis() + 5000;
         while (System.currentTimeMillis() < deadline) {
-            JsonNode m = inbox.poll(200, TimeUnit.MILLISECONDS);
-            if (m != null && type.equals(m.path("t").asText())) {
-                return m;
+            for (JsonNode m : inbox) {
+                if (type.equals(m.path("t").asText())) {
+                    inbox.remove(m);
+                    return m;
+                }
             }
+            Thread.sleep(50);
         }
         throw new AssertionError("Nie doczekano sie wiadomosci " + type);
     }

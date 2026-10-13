@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +23,18 @@ import pl.idiocracy.game.config.GameException;
 import pl.idiocracy.game.config.GameProperties;
 import pl.idiocracy.game.content.ContentCache;
 import pl.idiocracy.game.content.ContentChangedEvent;
+import pl.idiocracy.game.content.ContentType;
 import pl.idiocracy.game.content.GameMap;
 import pl.idiocracy.game.content.ItemTemplate;
+import pl.idiocracy.game.content.LootEntry;
+import pl.idiocracy.game.content.MonsterTemplate;
 import pl.idiocracy.game.content.Npc;
 import pl.idiocracy.game.content.Portal;
 
 /**
- * Autorytatywny swiat gry. Klient tylko prosi o ruch ("move N"), serwer sprawdza
- * kolizje, tempo i portale, po czym rozsyla wynik graczom z tej samej mapy.
+ * Autorytatywny swiat gry. Klient tylko prosi o ruch ("move N") i wskazuje cel ataku,
+ * serwer sprawdza kolizje, tempo i portale, symuluje potwory i rozsyla wynik graczom
+ * z tej samej instancji mapy.
  */
 @Service
 public class WorldService {
@@ -43,6 +48,7 @@ public class WorldService {
     private final CharacterService characters;
     private final PlayerProgression progression;
     private final QuestEngine quests;
+    private final MonsterEngine monsters;
     private final GameNotifier notifier;
     private final GameProperties props;
 
@@ -51,11 +57,12 @@ public class WorldService {
     private final Map<String, OnlinePlayer> bySession = new ConcurrentHashMap<>();
 
     public WorldService(ContentCache content, CharacterService characters, PlayerProgression progression,
-                        QuestEngine quests, GameNotifier notifier, GameProperties props) {
+                        QuestEngine quests, MonsterEngine monsters, GameNotifier notifier, GameProperties props) {
         this.content = content;
         this.characters = characters;
         this.progression = progression;
         this.quests = quests;
+        this.monsters = monsters;
         this.notifier = notifier;
         this.props = props;
     }
@@ -85,30 +92,36 @@ public class WorldService {
             p.quests.put(cq.getQuestCode(), cq);
         }
         progression.recompute(p);
+        if (p.hp <= 0) {
+            p.hp = p.derived.maxHp();
+        }
 
         GameMap map = content.map(pc.getMapCode()).orElse(null);
         if (map == null || !map.inBounds(pc.getX(), pc.getY())) {
             map = startMap();
-            place(p, map.getCode(), map.getSpawnX(), map.getSpawnY());
+            place(p, map, map.getSpawnX(), map.getSpawnY());
         } else {
-            place(p, map.getCode(), pc.getX(), pc.getY());
+            place(p, map, pc.getX(), pc.getY());
         }
+        List<Map<String, Object>> intros = quests.autoStart(p);
         online.put(p.characterId, p);
         bySession.put(session.getId(), p);
-        MapInstance inst = instance(p.mapCode);
+        MapInstance inst = instance(p);
         inst.players.put(p.characterId, p);
 
         notifier.send(p, Msg.of("welcome",
                 "title", props.title(),
                 "you", progression.selfPayload(p),
-                "map", mapPayload(map),
+                "map", mapPayload(map, p),
                 "players", others(inst, p),
+                "monsters", MonsterEngine.views(inst),
                 "marks", quests.markers(p),
                 "inventory", progression.inventoryPayload(p),
                 "quests", quests.questLog(p)));
         notifier.broadcast(inst, Msg.of("join", "player", p.publicView()), p);
         notifier.system(p, "Połączono z " + props.title() + ". Graczy online: " + online.size() + ".");
-        log.info("{} wchodzi do gry ({})", p.name, p.mapCode);
+        intros.forEach(d -> notifier.send(p, d));
+        log.info("{} wchodzi do gry ({})", p.name, p.instanceKey);
     }
 
     public void leave(WebSocketSession session) {
@@ -117,13 +130,10 @@ public class WorldService {
             return;
         }
         online.remove(p.characterId, p);
-        MapInstance inst = instances.get(p.mapCode);
-        if (inst != null && inst.players.remove(p.characterId, p)) {
-            notifier.broadcast(inst, Msg.of("leave", "id", p.characterId), p);
-        }
+        removeFromInstance(p);
         persistPosition(p);
         progression.persist(p);
-        log.info("{} opuszcza gre", p.name);
+        log.info("{} opuszcza grę", p.name);
     }
 
     // ------------------------------------------------------------- komendy
@@ -138,6 +148,7 @@ public class WorldService {
             switch (type) {
                 case "move" -> move(p, Direction.parse(msg.path("dir").asText()), msg.path("seq").asLong());
                 case "face" -> face(p, Direction.parse(msg.path("dir").asText()));
+                case "attack" -> attack(p, msg.path("id").isNumber() ? msg.path("id").asLong() : null);
                 case "chat" -> chat(p, msg.path("text").asText(""));
                 case "talk" -> talk(p, msg.path("npc").asText());
                 case "accept" -> accept(p, msg.path("quest").asText(), msg.path("npc").asText());
@@ -164,9 +175,9 @@ public class WorldService {
             int ny = p.y + dir.dy;
             p.dir = dir;
             boolean tooFast = now - p.lastMoveAtMs < p.derived.moveDelayMs() * MOVE_TOLERANCE;
-            if (map == null || tooFast || !isWalkable(map, nx, ny)) {
+            if (map == null || tooFast || p.hp <= 0 || !isWalkable(map, p, nx, ny)) {
                 notifier.send(p, Msg.of("correct", "x", p.x, "y", p.y, "dir", dir.name(), "seq", seq));
-                notifier.broadcast(instances.get(p.mapCode), Msg.of("face", "id", p.characterId, "dir", dir.name()), p);
+                notifier.broadcast(instance(p), Msg.of("face", "id", p.characterId, "dir", dir.name()), p);
                 return;
             }
             p.x = nx;
@@ -175,7 +186,7 @@ public class WorldService {
             p.positionDirty = true;
             portal = map.getPortals().stream().filter(pt -> pt.x() == nx && pt.y() == ny).findFirst().orElse(null);
         }
-        notifier.broadcast(instances.get(p.mapCode), Msg.of("moved", "id", p.characterId, "x", p.x, "y", p.y,
+        notifier.broadcast(instance(p), Msg.of("moved", "id", p.characterId, "x", p.x, "y", p.y,
                 "dir", dir.name(), "ms", p.derived.moveDelayMs()), p);
         quests.onMoved(p);
         if (portal != null) {
@@ -183,17 +194,18 @@ public class WorldService {
         }
     }
 
-    /** Czy na pole mozna wejsc - kafelki i NPC blokuja, gracze nie (jak w Margonem). */
-    boolean isWalkable(GameMap map, int x, int y) {
+    /** Pole jest wolne: kafelki, widoczni NPC i potwory blokuja, gracze nie (jak w Margonem). */
+    boolean isWalkable(GameMap map, OnlinePlayer p, int x, int y) {
         if (!map.inBounds(x, y) || content.isSolidTile(map, x, y)) {
             return false;
         }
-        for (Npc npc : content.npcsOn(map.getCode())) {
+        for (Npc npc : quests.visibleNpcs(p, map.getCode())) {
             if (npc.getX() == x && npc.getY() == y) {
                 return false;
             }
         }
-        return true;
+        MapInstance inst = instances.get(p.instanceKey);
+        return inst == null || inst.monsterAt(x, y) == null;
     }
 
     private void usePortal(OnlinePlayer p, Portal portal) {
@@ -208,23 +220,37 @@ public class WorldService {
     }
 
     void transfer(OnlinePlayer p, GameMap target, int x, int y) {
-        MapInstance from = instances.get(p.mapCode);
-        if (from != null && from.players.remove(p.characterId, p)) {
-            notifier.broadcast(from, Msg.of("leave", "id", p.characterId), p);
-        }
+        removeFromInstance(p);
         synchronized (p) {
-            place(p, target.getCode(), x, y);
+            place(p, target, x, y);
             p.positionDirty = true;
+            p.targetMonsterId = null;
         }
-        MapInstance to = instance(target.getCode());
+        MapInstance to = instance(p);
         to.players.put(p.characterId, p);
         notifier.send(p, Msg.of("enter",
                 "you", progression.selfPayload(p),
-                "map", mapPayload(target),
+                "map", mapPayload(target, p),
                 "players", others(to, p),
+                "monsters", MonsterEngine.views(to),
                 "marks", quests.markers(p)));
         notifier.broadcast(to, Msg.of("join", "player", p.publicView()), p);
         quests.onMoved(p);
+    }
+
+    private void removeFromInstance(OnlinePlayer p) {
+        MapInstance from = instances.get(p.instanceKey);
+        if (from != null && from.players.remove(p.characterId, p)) {
+            notifier.broadcast(from, Msg.of("leave", "id", p.characterId), p);
+            for (Monster m : from.monsters.values()) {
+                if (m.targetId != null && m.targetId == p.characterId) {
+                    m.targetId = null;
+                }
+            }
+            if (from.players.isEmpty() && !from.key.equals(from.mapCode)) {
+                instances.remove(from.key, from);
+            }
+        }
     }
 
     private void face(OnlinePlayer p, Direction dir) {
@@ -232,7 +258,18 @@ public class WorldService {
             return;
         }
         p.dir = dir;
-        notifier.broadcast(instances.get(p.mapCode), Msg.of("face", "id", p.characterId, "dir", dir.name()), p);
+        notifier.broadcast(instance(p), Msg.of("face", "id", p.characterId, "dir", dir.name()), p);
+    }
+
+    private void attack(OnlinePlayer p, Long monsterId) {
+        MapInstance inst = instance(p);
+        if (monsterId == null || !inst.monsters.containsKey(monsterId)) {
+            p.targetMonsterId = null;
+            notifier.send(p, Msg.of("target", "id", null));
+            return;
+        }
+        p.targetMonsterId = monsterId;
+        notifier.send(p, Msg.of("target", "id", monsterId));
     }
 
     private void chat(OnlinePlayer p, String raw) {
@@ -247,8 +284,7 @@ public class WorldService {
             command(p, text);
             return;
         }
-        notifier.broadcast(instances.get(p.mapCode),
-                Msg.of("chat", "id", p.characterId, "from", p.name, "text", text), null);
+        notifier.broadcast(instance(p), Msg.of("chat", "id", p.characterId, "from", p.name, "text", text), null);
     }
 
     private void command(OnlinePlayer p, String text) {
@@ -257,7 +293,8 @@ public class WorldService {
             case "/who" -> notifier.system(p, "Online (" + online.size() + "): "
                     + String.join(", ", online.values().stream().map(o -> o.name).sorted().toList()));
             case "/pos" -> notifier.system(p, p.mapCode + " [" + p.x + ", " + p.y + "]");
-            case "/help" -> notifier.system(p, "Komendy: /who, /pos, /help. Rozmowa z NPC: podejdź i kliknij go lub wciśnij E.");
+            case "/help" -> notifier.system(p, "Komendy: /who, /pos, /help. Rozmowa: klik na NPC lub E. "
+                    + "Walka: klik na potwora lub Spacja (najbliższy cel), Esc — przerwij.");
             default -> notifier.system(p, "Nieznana komenda. Spróbuj /help");
         }
     }
@@ -265,6 +302,7 @@ public class WorldService {
     private void talk(OnlinePlayer p, String npcCode) {
         Npc npc = nearbyNpc(p, npcCode);
         notifier.send(p, quests.talk(p, npc));
+        quests.afterQuestChange(p);
     }
 
     private void accept(OnlinePlayer p, String questCode, String npcCode) {
@@ -272,7 +310,8 @@ public class WorldService {
     }
 
     private Npc nearbyNpc(OnlinePlayer p, String npcCode) {
-        Npc npc = content.npc(npcCode).orElseThrow(() -> GameException.badRequest("Nie ma takiej osoby"));
+        Npc npc = content.npc(npcCode).filter(n -> quests.isVisible(p, n))
+                .orElseThrow(() -> GameException.badRequest("Nie ma takiej osoby"));
         if (!npc.getMapCode().equals(p.mapCode)
                 || Math.max(Math.abs(npc.getX() - p.x), Math.abs(npc.getY() - p.y)) > QuestEngine.TALK_DISTANCE) {
             throw GameException.badRequest("Podejdź bliżej, żeby porozmawiać.");
@@ -294,6 +333,7 @@ public class WorldService {
         int heal = used.getStats().heal();
         synchronized (p) {
             p.hp = Math.min(p.derived.maxHp(), p.hp + heal);
+            p.positionDirty = true;
         }
         notifier.system(p, "Użyto: " + used.getName() + (heal > 0 ? " (+" + heal + " HP)" : ""));
         refreshAfterInventory(p);
@@ -304,15 +344,82 @@ public class WorldService {
         progression.sendInventory(p);
         progression.sendSelf(p);
         if (looksChanged) {
-            notifier.broadcast(instances.get(p.mapCode), Msg.of("update", "player", p.publicView()), p);
+            notifier.broadcast(instance(p), Msg.of("update", "player", p.publicView()), p);
         }
         quests.onInventoryChanged(p);
+    }
+
+    // ------------------------------------------------------------- walka
+
+    @Scheduled(fixedRate = 100)
+    public void tick() {
+        long now = System.currentTimeMillis();
+        for (MapInstance inst : instances.values()) {
+            if (inst.players.isEmpty()) {
+                continue;
+            }
+            GameMap map = content.map(inst.mapCode).orElse(null);
+            if (map == null) {
+                continue;
+            }
+            try {
+                MonsterEngine.Outcome out = monsters.tick(inst, map, now);
+                out.kills().forEach(k -> reward(k.killer(), k.monster()));
+                out.deaths().forEach(p -> knockOut(p, map));
+            } catch (RuntimeException e) {
+                log.error("Błąd symulacji instancji {}", inst.key, e);
+            }
+        }
+    }
+
+    private void reward(OnlinePlayer p, MonsterTemplate m) {
+        progression.addXp(p, m.getXp());
+        var rnd = ThreadLocalRandom.current();
+        long coins = m.getCcoinMax() > 0 ? rnd.nextInt(m.getCcoinMin(), m.getCcoinMax() + 1) : 0;
+        progression.addCcoin(p, coins);
+        boolean loot = false;
+        for (LootEntry e : m.getLoot()) {
+            if (content.item(e.code()).isEmpty() || rnd.nextDouble() * 100 >= e.chance()) {
+                continue;
+            }
+            int qty = Math.max(1, e.max() > e.min() ? rnd.nextInt(e.min(), e.max() + 1) : e.min());
+            characters.grantItem(p.characterId, e.code(), qty);
+            notifier.system(p, "Łup: " + content.item(e.code()).get().getName() + (qty > 1 ? " x" + qty : ""));
+            loot = true;
+        }
+        progression.persist(p);
+        progression.sendSelf(p);
+        if (loot) {
+            progression.sendInventory(p);
+        }
+        quests.onKill(p, m.getCode());
+        if (loot) {
+            quests.onInventoryChanged(p);
+        }
+    }
+
+    /** Postac traci przytomnosc i budzi sie w punkcie startowym mapy. */
+    private void knockOut(OnlinePlayer p, GameMap map) {
+        synchronized (p) {
+            p.hp = Math.max(1, p.derived.maxHp() / 2);
+            p.targetMonsterId = null;
+        }
+        notifier.system(p, "Tracisz przytomność. Budzisz się obolały w bezpieczniejszym miejscu.");
+        transfer(p, map, map.getSpawnX(), map.getSpawnY());
+        progression.sendSelf(p);
     }
 
     // ------------------------------------------------------ edycja na zywo
 
     @EventListener
     public void onContentChanged(ContentChangedEvent event) {
+        if (event.type() == ContentType.MAPS || event.type() == ContentType.MONSTERS) {
+            for (MapInstance inst : instances.values()) {
+                if (event.type() == ContentType.MONSTERS || inst.mapCode.equals(event.code())) {
+                    inst.resetMonsters();
+                }
+            }
+        }
         for (OnlinePlayer p : List.copyOf(online.values())) {
             notifier.send(p, Msg.of("content", "type", event.type().path(), "code", event.code()));
             GameMap map = content.map(p.mapCode).orElse(null);
@@ -322,9 +429,10 @@ public class WorldService {
                 continue;
             }
             switch (event.type()) {
-                case MAPS, NPCS, QUESTS, TILES -> {
-                    notifier.send(p, Msg.of("mapReload", "map", mapPayload(map), "marks", quests.markers(p)));
-                    if (event.type() == pl.idiocracy.game.content.ContentType.QUESTS) {
+                case MAPS, NPCS, QUESTS, TILES, MONSTERS -> {
+                    notifier.send(p, Msg.of("mapReload", "map", mapPayload(map, p), "marks", quests.markers(p),
+                            "monsters", MonsterEngine.views(instance(p))));
+                    if (event.type() == ContentType.QUESTS) {
                         notifier.send(p, Msg.of("quests", "quests", quests.questLog(p)));
                     }
                 }
@@ -359,14 +467,16 @@ public class WorldService {
         return content.map(props.startMap()).orElseGet(() -> content.get().maps().values().iterator().next());
     }
 
-    private void place(OnlinePlayer p, String mapCode, int x, int y) {
-        p.mapCode = mapCode;
+    private void place(OnlinePlayer p, GameMap map, int x, int y) {
+        p.mapCode = map.getCode();
+        p.instanceKey = map.isInstanced() ? map.getCode() + "#" + p.characterId : map.getCode();
         p.x = x;
         p.y = y;
     }
 
-    private MapInstance instance(String code) {
-        return instances.computeIfAbsent(code, MapInstance::new);
+    private MapInstance instance(OnlinePlayer p) {
+        String mapCode = p.mapCode;
+        return instances.computeIfAbsent(p.instanceKey, k -> new MapInstance(k, mapCode));
     }
 
     private List<Map<String, Object>> others(MapInstance inst, OnlinePlayer self) {
@@ -379,11 +489,9 @@ public class WorldService {
         return list;
     }
 
-    private Map<String, Object> mapPayload(GameMap map) {
-        List<Map<String, Object>> npcs = content.npcsOn(map.getCode()).stream()
-                .map(n -> Msg.of("npc", "code", n.getCode(), "name", n.getName(), "x", n.getX(), "y", n.getY(),
-                        "app", n.getAppearance()))
-                .toList();
+    private Map<String, Object> mapPayload(GameMap map, OnlinePlayer p) {
+        List<Map<String, Object>> npcs = quests.visibleNpcs(p, map.getCode()).stream()
+                .map(QuestEngine::npcView).toList();
         return Msg.of("map", "code", map.getCode(), "name", map.getName(), "width", map.getWidth(),
                 "height", map.getHeight(), "ground", map.getLayers().ground(), "objects", map.getLayers().objects(),
                 "portals", map.getPortals(), "spawn", Map.of("x", map.getSpawnX(), "y", map.getSpawnY()),

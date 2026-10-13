@@ -12,7 +12,8 @@ public enum ContentType {
     ITEMS("items", ItemTemplate.class),
     MAPS("maps", GameMap.class),
     NPCS("npcs", Npc.class),
-    QUESTS("quests", Quest.class);
+    QUESTS("quests", Quest.class),
+    MONSTERS("monsters", MonsterTemplate.class);
 
     private final String path;
     private final Class<? extends ContentEntity> entityClass;

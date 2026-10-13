@@ -35,7 +35,8 @@ Każdy kolor ma przypisany ciemniejszy odpowiednik (`SHADE`), używany do automa
 4. **Świat jest zmęczony**: szarości, rdza, zgniła zieleń. Nasycone kolory to akcent, nie tło.
 5. **Neon = technologia**. Jeśli coś świeci na turkusowo, to znaczy, że kiedyś myślało za ludzi.
 6. Obiekty stojące na ziemi mogą mieć cień `1` w ostatnim wierszu.
-7. Humor w nazwach i opisach — ludzkość zapomniała, jak działają proste rzeczy.
+7. Ton: poważny, z niepokojem w tle. Świat po burzy jest cichy i zmęczony — opisy mają budować nastrój, nie żarty.
+8. Potwory: sprite zwrócony w prawo (E), 2 klatki chodu; gra sama odbija go przy ruchu w lewo.
 
 ## Postacie
 

@@ -81,7 +81,7 @@ public class PlayerProgression {
             synchronized (p) {
                 p.hp = p.derived.maxHp();
             }
-            notifier.system(p, "AWANS! Poziom " + p.level + ". Myślenie boli trochę mniej.");
+            notifier.system(p, "Awans! Osiągasz poziom " + p.level + ".");
         }
         return gained;
     }

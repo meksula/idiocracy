@@ -2,6 +2,7 @@ package pl.idiocracy.game.content;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -21,8 +22,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 
 /**
- * Laduje startowa tresc z classpath:content/*.json gdy dana tabela jest pusta.
- * Po pierwszym starcie zrodlem prawdy jest baza + edytor.
+ * Laduje startowa tresc z classpath:content/*.json. Dodaje tylko elementy, ktorych kodu
+ * jeszcze nie ma w bazie - niczego nie nadpisuje, wiec edycje z edytora sa bezpieczne,
+ * a nowa tresc z kolejnych wersji gry trafia do istniejacych baz.
  */
 @Component
 @Order(1)
@@ -36,19 +38,22 @@ public class ContentSeeder implements ApplicationRunner {
     private final RaceRepository races;
     private final CharacterClassRepository classes;
     private final ItemTemplateRepository items;
+    private final MonsterTemplateRepository monsters;
     private final GameMapRepository maps;
     private final NpcRepository npcs;
     private final QuestRepository quests;
 
     public ContentSeeder(ObjectMapper mapper, ContentCache cache, TileDefRepository tiles, RaceRepository races,
-                         CharacterClassRepository classes, ItemTemplateRepository items, GameMapRepository maps,
-                         NpcRepository npcs, QuestRepository quests) {
+                         CharacterClassRepository classes, ItemTemplateRepository items,
+                         MonsterTemplateRepository monsters, GameMapRepository maps, NpcRepository npcs,
+                         QuestRepository quests) {
         this.mapper = mapper;
         this.cache = cache;
         this.tiles = tiles;
         this.races = races;
         this.classes = classes;
         this.items = items;
+        this.monsters = monsters;
         this.maps = maps;
         this.npcs = npcs;
         this.quests = quests;
@@ -61,29 +66,23 @@ public class ContentSeeder implements ApplicationRunner {
         seed("races.json", Race.class, races);
         seed("classes.json", CharacterClass.class, classes);
         seed("items.json", ItemTemplate.class, items);
-        if (maps.count() == 0) {
-            Resource[] files = new PathMatchingResourcePatternResolver().getResources("classpath:content/maps/*.json");
-            Arrays.sort(files, Comparator.comparing(Resource::getFilename));
-            for (Resource file : files) {
-                try (InputStream in = file.getInputStream()) {
-                    GameMap map = mapper.readValue(in, GameMap.class);
-                    map.validate();
-                    maps.save(map);
-                }
+        seed("monsters.json", MonsterTemplate.class, monsters);
+        Resource[] files = new PathMatchingResourcePatternResolver().getResources("classpath:content/maps/*.json");
+        Arrays.sort(files, Comparator.comparing(Resource::getFilename));
+        List<GameMap> mapList = new ArrayList<>();
+        for (Resource file : files) {
+            try (InputStream in = file.getInputStream()) {
+                mapList.add(mapper.readValue(in, GameMap.class));
             }
-            log.info("Zaladowano {} map startowych", files.length);
         }
+        insertMissing(mapList, maps, "GameMap");
         seed("npcs.json", Npc.class, npcs);
         seed("quests.json", Quest.class, quests);
-        maps.flush();
         cache.reload();
     }
 
     private <T extends ContentEntity> void seed(String file, Class<T> type, JpaRepository<T, String> repo)
             throws IOException {
-        if (repo.count() > 0) {
-            return;
-        }
         Resource res = new PathMatchingResourcePatternResolver().getResource("classpath:content/" + file);
         if (!res.exists()) {
             return;
@@ -91,9 +90,17 @@ public class ContentSeeder implements ApplicationRunner {
         CollectionType listType = mapper.getTypeFactory().constructCollectionType(List.class, type);
         try (InputStream in = res.getInputStream()) {
             List<T> list = mapper.readValue(in, listType);
-            list.forEach(ContentEntity::validate);
-            repo.saveAllAndFlush(list);
-            log.info("Zaladowano {} x {}", list.size(), type.getSimpleName());
+            insertMissing(list, repo, type.getSimpleName());
         }
+    }
+
+    private <T extends ContentEntity> void insertMissing(List<T> list, JpaRepository<T, String> repo, String label) {
+        List<T> missing = list.stream().filter(e -> !repo.existsById(e.getCode())).toList();
+        if (missing.isEmpty()) {
+            return;
+        }
+        missing.forEach(ContentEntity::validate);
+        repo.saveAllAndFlush(missing);
+        log.info("Dodano {} x {}: {}", missing.size(), label, missing.stream().map(ContentEntity::getCode).toList());
     }
 }

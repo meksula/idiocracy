@@ -97,16 +97,27 @@ export const npcsTab = () => new CrudTab({
   type: 'npcs', title: 'NPC',
   label: (n) => n.name,
   icon: (n) => { const c = el('canvas', { class: 'pixel', width: 32, height: 32 }); c.getContext('2d').drawImage(characterCanvas(n.appearance, 'S', 0, 2), 0, 0); return c; },
-  newEntity: () => ({ code: '', name: '', mapCode: null, x: 1, y: 1, greeting: '', appearance: { skin: 's', hair: 'B', eyes: '0', primary: '4', secondary: '2', feet: '1' } }),
+  newEntity: () => ({ code: '', name: '', mapCode: null, x: 1, y: 1, dir: 'S', visibility: null, greeting: '', appearance: { skin: 's', hair: 'B', eyes: '0', primary: '4', secondary: '2', feet: '1' } }),
   form: async (n, { markDirty }) => {
     const maps = await Editor.list('maps');
-    const quests = (await Editor.list('quests')).filter(q => q.giverNpc === n.code);
+    const allQuests = await Editor.list('quests');
+    const quests = allQuests.filter(q => q.giverNpc === n.code);
+    n.visibility = n.visibility || { quest: null, fromStep: null, toStep: null, fleeX: null, fleeY: null };
     return el('div', {},
       el('div', { class: 'form-grid' },
         field('Imię / nazwa', text(n, 'name', { onInput: markDirty })),
         field('Mapa', select(n, 'mapCode', maps.map(m => [m.code, m.name]), { onInput: markDirty })),
         field('X', num(n, 'x', { min: 0, onInput: markDirty })),
-        field('Y', num(n, 'y', { min: 0, onInput: markDirty }))),
+        field('Y', num(n, 'y', { min: 0, onInput: markDirty })),
+        field('Zwrócony w stronę', select(n, 'dir', [['S', 'południe ↓'], ['N', 'północ ↑'], ['E', 'wschód →'], ['W', 'zachód ←']], { onInput: markDirty }))),
+      el('h3', { text: 'Widoczność' }),
+      el('div', { class: 'form-grid' },
+        field('Widoczny tylko podczas misji', select(n.visibility, 'quest', allQuests.map(q => [q.code, q.title]), { empty: '— zawsze widoczny —', onInput: markDirty })),
+        field('od kroku (1 = pierwszy)', stepNum(n.visibility, 'fromStep', markDirty)),
+        field('do kroku', stepNum(n.visibility, 'toStep', markDirty)),
+        field('Ucieka do X (opcjonalnie)', num(n.visibility, 'fleeX', { min: 0, nullable: true, onInput: markDirty })),
+        field('Ucieka do Y', num(n.visibility, 'fleeY', { min: 0, nullable: true, onInput: markDirty }))),
+      el('div', { class: 'hint', text: 'Np. postać, która ucieka po rozmowie: widoczna od kroku 1 do kroku z rozmową. Gdy zniknie, gracz zobaczy, jak odbiega.' }),
       el('div', { class: 'hint', text: 'Pozycję wygodniej ustawić w edytorze map (narzędzie „NPC”).' }),
       field('Powitanie (pierwsza kwestia w dialogu)', area(n, 'greeting', 3, markDirty)),
       el('h3', { text: 'Wygląd' }),
@@ -115,6 +126,14 @@ export const npcsTab = () => new CrudTab({
       quests.length ? el('ul', {}, quests.map(q => el('li', { text: `${q.title} (${q.code})` }))) : el('div', { class: 'muted', text: 'Brak — przypisz NPC jako zleceniodawcę w zakładce Misje.' }));
   },
 });
+
+/** Pole z numerem kroku pokazywanym od 1, zapisywanym od 0. */
+function stepNum(obj, key, onInput) {
+  return el('input', {
+    type: 'number', min: 1, value: obj[key] === null || obj[key] === undefined ? '' : obj[key] + 1,
+    oninput: (e) => { obj[key] = e.target.value === '' ? null : Number(e.target.value) - 1; onInput(); },
+  });
+}
 
 // ================================================================ RASY / KLASY
 function raceClassForm(entity, markDirty, appKeys, extra = null) {
@@ -149,17 +168,18 @@ export const classesTab = () => new CrudTab({
 });
 
 // ====================================================================== MISJE
-const STEP_TYPES = [['TALK', 'Rozmowa z NPC'], ['VISIT', 'Dotrzyj w miejsce'], ['COLLECT', 'Zdobądź przedmioty'], ['KILL', 'Pokonaj wrogów (wymaga systemu walki)']];
+const STEP_TYPES = [['TALK', 'Rozmowa z NPC'], ['VISIT', 'Dotrzyj w miejsce'], ['COLLECT', 'Zdobądź przedmioty'], ['KILL', 'Pokonaj wrogów']];
+const DIALOG_HINT = 'Jedna kwestia w linii. „* tekst” — narracja, „> tekst” — gracz, „Imię: tekst” — dana postać. Długie rozmowy odsłaniają się po dwie linie.';
 
 export const questsTab = () => new CrudTab({
   type: 'quests', title: 'misja', label: (q) => q.title,
   newEntity: () => ({
-    code: '', title: '', description: '', giverNpc: null, minLevel: 1, repeatable: false, sortOrder: 0,
+    code: '', title: '', description: '', giverNpc: null, minLevel: 1, repeatable: false, autoStart: false, sortOrder: 0,
     steps: [{ type: 'TALK', target: null, text: '', dialog: '' }],
     rewards: { ccoin: 10, xp: 50, items: [] }, dialog: { offer: '', progress: '', complete: '' },
   }),
   form: async (q, { markDirty }) => {
-    const [npcs, maps, items] = await Promise.all([Editor.list('npcs'), Editor.list('maps'), Editor.list('items')]);
+    const [npcs, maps, items, monsters] = await Promise.all([Editor.list('npcs'), Editor.list('maps'), Editor.list('items'), Editor.list('monsters')]);
     q.rewards = q.rewards || { ccoin: 0, xp: 0, items: [] };
     q.rewards.items = q.rewards.items || [];
     q.dialog = q.dialog || {};
@@ -169,12 +189,12 @@ export const questsTab = () => new CrudTab({
     const renderFlow = () => {
       flow.innerHTML = '';
       const giver = npcs.find(n => n.code === q.giverNpc);
-      const nodes = [`🗨 ${giver ? giver.name : '???'} zleca misję`];
+      const nodes = [q.autoStart ? '★ startuje sama' : `🗨 ${giver ? giver.name : '???'} zleca misję`];
       for (const s of q.steps) {
         if (s.type === 'TALK') nodes.push(`🗨 ${npcs.find(n => n.code === s.target)?.name || '?'}`);
         else if (s.type === 'VISIT') nodes.push(`⌖ ${maps.find(m => m.code === s.target)?.name || '?'} [${s.x ?? '?'}, ${s.y ?? '?'}]`);
         else if (s.type === 'COLLECT') nodes.push(`▣ ${s.count || 1}× ${items.find(i => i.code === s.target)?.name || '?'}${s.consume ? ' (oddaj)' : ''}`);
-        else nodes.push(`⚔ ${s.count || 1}× ${s.target || '?'}`);
+        else nodes.push(`⚔ ${s.count || 1}× ${monsters.find(m => m.code === s.target)?.name || s.target || '?'}`);
       }
       nodes.push(`◈ ${q.rewards.ccoin} c-coin · ${q.rewards.xp} XP${q.rewards.items.length ? ' · ' + q.rewards.items.length + ' przedm.' : ''}`);
       nodes.forEach((n, i) => { if (i) flow.append(el('span', { class: 'arrow', text: '→' })); flow.append(el('span', { class: 'node', text: n })); });
@@ -195,7 +215,7 @@ export const questsTab = () => new CrudTab({
             field('Ilość', num(s, 'count', { min: 1, onInput: dirty, nullable: true })),
             field('Oddanie', check(s, 'consume', 'zabierz przedmioty po zaliczeniu', dirty)));
           return el('div', { class: 'form-grid' },
-            field('Kod przeciwnika', text(s, 'target', { onInput: dirty })),
+            field('Przeciwnik', select(s, 'target', monsters.map(m => [m.code, `${m.name} [${m.level}]`]), { onInput: dirty })),
             field('Ilość', num(s, 'count', { min: 1, onInput: dirty, nullable: true })));
         };
         const card = el('div', { class: 'step panel' },
@@ -208,7 +228,8 @@ export const questsTab = () => new CrudTab({
             el('button', { class: 'danger small', onclick: () => { q.steps.splice(i, 1); dirty(); renderSteps(); } }, '✕')),
           targetField(),
           field('Cel w dzienniku gracza', text(s, 'text', { onInput: dirty, placeholder: 'np. Porozmawiaj z Haliną w bibliotece.' })),
-          s.type === 'TALK' ? field('Co powie NPC przy zaliczeniu kroku', area(s, 'dialog', 2, dirty)) : null);
+          s.type === 'TALK' ? field('Rozmowa przy zaliczeniu kroku', area(s, 'dialog', 5, dirty), DIALOG_HINT) : null,
+          field('Przedmioty wręczane po tym kroku', itemStackList(s.give = s.give || [], items, dirty)));
         stepsBox.append(card);
       });
       stepsBox.append(el('button', { class: 'neon small', onclick: () => { q.steps.push({ type: 'TALK', target: null, text: '', dialog: '' }); dirty(); renderSteps(); } }, '+ Dodaj krok'));
@@ -222,17 +243,70 @@ export const questsTab = () => new CrudTab({
         field('Zleceniodawca', select(q, 'giverNpc', npcs.map(n => [n.code, `${n.name} (${n.mapCode})`]), { empty: '— brak —', onInput: dirty })),
         field('Min. poziom', num(q, 'minLevel', { min: 1, onInput: dirty })),
         field('Kolejność', num(q, 'sortOrder', { onInput: dirty })),
-        field('Powtarzalna', check(q, 'repeatable', 'można brać wielokrotnie', dirty))),
+        field('Powtarzalna', check(q, 'repeatable', 'można brać wielokrotnie', dirty)),
+        field('Start automatyczny', check(q, 'autoStart', 'przydziel sama (bez zleceniodawcy)', dirty))),
       field('Opis (w dzienniku)', area(q, 'description', 2, dirty)),
       el('h3', { text: 'Przebieg' }), flow,
       el('h3', { text: 'Dialogi zleceniodawcy' }),
-      field('Propozycja misji', area(q.dialog, 'offer', 3, dirty)),
+      field('Propozycja misji (przy starcie automatycznym: narracja na wejście)', area(q.dialog, 'offer', 4, dirty), DIALOG_HINT),
       field('Gdy gracz wraca w trakcie', area(q.dialog, 'progress', 2, dirty)),
       field('Po ukończeniu (przy nagrodzie)', area(q.dialog, 'complete', 2, dirty)),
       el('h3', { text: 'Kroki' }), stepsBox,
       el('h3', { text: 'Nagroda' }),
       el('div', { class: 'form-grid' }, field('c-coin', num(q.rewards, 'ccoin', { min: 0, onInput: dirty })), field('XP', num(q.rewards, 'xp', { min: 0, onInput: dirty }))),
       itemStackList(q.rewards.items, items, dirty));
+  },
+});
+
+// =================================================================== POTWORY
+function lootList(arr, items, onInput) {
+  const box = el('div', { class: 'stack-list' });
+  const render = () => {
+    box.innerHTML = '';
+    arr.forEach((l, i) => box.append(el('div', { class: 'row' },
+      select(l, 'code', items.map(it => [it.code, it.name]), { onInput }),
+      el('span', { class: 'muted', text: 'szansa %' }), el('input', { type: 'number', min: 0, max: 100, step: 0.5, value: l.chance, style: { width: '90px' }, oninput: (e) => { l.chance = Number(e.target.value); onInput(); } }),
+      el('span', { class: 'muted', text: 'ilość' }), el('input', { type: 'number', min: 1, value: l.min, style: { width: '70px' }, oninput: (e) => { l.min = Number(e.target.value) || 1; onInput(); } }),
+      el('span', { class: 'muted', text: '–' }), el('input', { type: 'number', min: 1, value: l.max, style: { width: '70px' }, oninput: (e) => { l.max = Number(e.target.value) || 1; onInput(); } }),
+      el('button', { class: 'danger small', onclick: () => { arr.splice(i, 1); render(); onInput(); } }, '✕'))));
+    box.append(el('button', { class: 'secondary small', onclick: () => { arr.push({ code: items[0]?.code, chance: 25, min: 1, max: 1 }); render(); onInput(); } }, '+ łup'));
+  };
+  render();
+  return box;
+}
+
+export const monstersTab = () => new CrudTab({
+  type: 'monsters', title: 'potwór',
+  label: (m) => `${m.name} [${m.level}]`, icon: (m) => icon(m.sprite),
+  newEntity: () => ({
+    code: '', name: '', level: 1, maxHp: 20, attack: 3, defense: 0, xp: 10, ccoinMin: 0, ccoinMax: 2,
+    aggressive: false, aggroRange: 3, moveDelayMs: 500, attackDelayMs: 1500, respawnSec: 30, loot: [], sprite: emptySprite(),
+  }),
+  form: async (m, { markDirty }) => {
+    const items = await Editor.list('items');
+    m.loot = m.loot || [];
+    return el('div', {},
+      el('div', { class: 'form-grid' },
+        field('Nazwa', text(m, 'name', { onInput: markDirty })),
+        field('Poziom', num(m, 'level', { min: 1, onInput: markDirty })),
+        field('HP', num(m, 'maxHp', { min: 1, onInput: markDirty })),
+        field('Atak', num(m, 'attack', { min: 0, onInput: markDirty })),
+        field('Obrona', num(m, 'defense', { min: 0, onInput: markDirty })),
+        field('XP za pokonanie', num(m, 'xp', { min: 0, onInput: markDirty })),
+        field('c-coin od', num(m, 'ccoinMin', { min: 0, onInput: markDirty })),
+        field('c-coin do', num(m, 'ccoinMax', { min: 0, onInput: markDirty }))),
+      el('h3', { text: 'Zachowanie' }),
+      el('div', { class: 'form-grid' },
+        field('Agresja', check(m, 'aggressive', 'atakuje sam, gdy gracz podejdzie', markDirty)),
+        field('Zasięg wykrycia (pola)', num(m, 'aggroRange', { min: 0, onInput: markDirty })),
+        field('Czas kroku (ms)', num(m, 'moveDelayMs', { min: 100, onInput: markDirty }), 'Mniej = szybszy. Gracz: ok. 230–260 ms.'),
+        field('Czas ataku (ms)', num(m, 'attackDelayMs', { min: 200, onInput: markDirty })),
+        field('Odrodzenie (s)', num(m, 'respawnSec', { min: 1, onInput: markDirty }))),
+      el('div', { class: 'hint', text: 'Obrażenia = atak + losowo do 50% ataku − połowa obrony celu (min. 1). Gdzie się pojawia — ustawiasz w edytorze map (narzędzie „Potwory”).' }),
+      el('h3', { text: 'Łup' }),
+      lootList(m.loot, items, markDirty),
+      el('h3', { text: 'Grafika 16×16 (zwrócony w prawo; gra odbija go przy ruchu w lewo)' }),
+      pixelEditor(m, 'sprite', markDirty));
   },
 });
 

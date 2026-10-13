@@ -23,6 +23,10 @@ public class Npc implements ContentEntity {
     @Column(columnDefinition = "jsonb")
     private Appearance appearance = Appearance.EMPTY;
     private String greeting = "";
+    private String dir = "S";
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private NpcVisibility visibility;
 
     @Override
     public void validate() {
@@ -47,4 +51,10 @@ public class Npc implements ContentEntity {
     public void setAppearance(Appearance appearance) { this.appearance = appearance == null ? Appearance.EMPTY : appearance; }
     public String getGreeting() { return greeting; }
     public void setGreeting(String greeting) { this.greeting = greeting == null ? "" : greeting; }
+    public String getDir() { return dir; }
+    public void setDir(String dir) { this.dir = dir == null || !dir.matches("[NSEW]") ? "S" : dir; }
+    public NpcVisibility getVisibility() { return visibility; }
+    public void setVisibility(NpcVisibility visibility) {
+        this.visibility = visibility == null || visibility.quest() == null || visibility.quest().isBlank() ? null : visibility;
+    }
 }

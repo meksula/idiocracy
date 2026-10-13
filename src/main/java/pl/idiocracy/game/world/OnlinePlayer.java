@@ -26,6 +26,12 @@ public class OnlinePlayer {
     final WebSocketSession session;
 
     volatile String mapCode;
+    /** Klucz instancji mapy: kod mapy albo kod#idPostaci dla map instancjonowanych. */
+    volatile String instanceKey;
+    volatile Long targetMonsterId;
+    long lastAttackAtMs;
+    long lastHitAtMs;
+    long lastRegenAtMs;
     volatile int x;
     volatile int y;
     volatile Direction dir;
@@ -88,6 +94,8 @@ public class OnlinePlayer {
         m.put("cls", classCode);
         m.put("app", appearance);
         m.put("ms", derived.moveDelayMs());
+        m.put("hp", hp);
+        m.put("maxHp", derived.maxHp());
         return m;
     }
 
@@ -104,6 +112,7 @@ public class OnlinePlayer {
         m.put("stats", derived.attributes());
         m.put("attack", derived.attack());
         m.put("defense", derived.defense());
+        m.put("attackMs", derived.attackDelayMs());
         m.put("map", mapCode);
         return m;
     }

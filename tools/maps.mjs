@@ -7,6 +7,8 @@ class MapBuilder {
     this.ground = Array(w * h).fill(ground);
     this.objects = Array(w * h).fill(null);
     this.portals = [];
+    this.spawns = [];
+    this.instanced = false;
     this.r = rng(hash(code));
   }
   i(x, y) { return y * this.w + x; }
@@ -53,11 +55,12 @@ class MapBuilder {
   }
   clear(x, y, w = 1, h = 1) { return this.fillO(x, y, w, h, null); }
   portal(x, y, targetMap, targetX, targetY, label) { this.portals.push({ x, y, targetMap, targetX, targetY, label }); return this; }
+  spawn(monster, x, y, w, h, count) { this.spawns.push({ monster, x, y, w, h, count }); return this; }
   build(spawnX, spawnY) {
     return {
       code: this.code, name: this.name, width: this.w, height: this.h,
       layers: { ground: this.ground, objects: this.objects },
-      spawnX, spawnY, portals: this.portals,
+      spawnX, spawnY, portals: this.portals, spawns: this.spawns, instanced: this.instanced,
     };
   }
 }
@@ -99,7 +102,8 @@ function osada() {
   // ogrodzenie z wyjsciami na drogach
   m.border('fence', [[0, 14], [0, 15], [0, 16], [39, 14], [39, 15], [39, 16], [19, 0], [20, 0], [21, 0], [19, 29], [20, 29], [21, 29]]);
   // zamkniete zachod/polnoc/poludnie - "jeszcze nie odbudowane"
-  m.o(0, 14, 'rubble').o(0, 15, 'rubble').o(0, 16, 'rubble');
+  // zachod: przejscie na podworze kamienicy
+  for (const y of [14, 15, 16]) { m.clear(0, y).clear(1, y); m.portal(0, y, 'podworze', 30, y + 6, 'Podwórze kamienicy'); }
   m.o(19, 0, 'rubble').o(20, 0, 'rubble').o(21, 0, 'rubble');
   m.o(19, 29, 'rubble').o(20, 29, 'rubble').o(21, 29, 'rubble');
   // przejscie na wschod -> ruiny
@@ -142,7 +146,56 @@ function ruiny() {
   return m.build(2, 15);
 }
 
-export const MAPS = [osada(), ruiny()];
+// ======================================================= MIESZKANIE (instancja)
+function dom() {
+  const m = new MapBuilder('dom', 'Twoje mieszkanie', 12, 9, 'wood-floor');
+  m.instanced = true;
+  m.building(0, 0, 12, 9, 'wall-brick', 'wood-floor', [[6, 8]]);
+  m.o(3, 0, 'window-wall').o(8, 0, 'window-wall');
+  m.o(1, 1, 'bed').o(4, 1, 'table').o(9, 1, 'kitchen-counter').o(10, 1, 'kitchen-counter');
+  m.o(10, 4, 'bookshelf').o(1, 7, 'crate').o(10, 7, 'trash-bags').o(4, 5, 'table');
+  m.o(6, 8, 'doorway');
+  m.portal(6, 8, 'podworze', 8, 5, 'Podwórze');
+  return m.build(2, 3);
+}
+
+// ======================================================= PODWORZE KAMIENICY
+function podworze() {
+  const m = new MapBuilder('podworze', 'Podwórze kamienicy', 32, 24, 'concrete');
+  m.scatterG('concrete-cracked', 0.22).scatterG('dirt', 0.05);
+  m.fillG(0, 18, 20, 5, 'asphalt').scatterG('concrete-cracked', 0.1, [0, 18, 20, 5], ['asphalt']);
+  // kamienica (polnoc)
+  m.fillO(0, 0, 32, 4, 'wall-brick');
+  for (const x of [3, 6, 12, 16, 20, 24, 28]) m.o(x, 2, 'window-wall');
+  m.o(8, 3, 'doorway').portal(8, 3, 'dom', 6, 7, 'Mieszkanie');
+  m.o(4, 4, 'robot-slumped').o(15, 4, 'robot-slumped').o(23, 4, 'robot-slumped');
+  // martwe roboty serwisowe porozrzucane po podworzu
+  const robots = [
+    [4, 7, 'a'], [6, 9, 'b'], [9, 7, 'a'], [10, 12, 'a'], [12, 10, 'b'], [14, 7, 'a'], [16, 11, 'b'],
+    [5, 13, 'a'], [8, 15, 'b'], [13, 14, 'a'], [17, 8, 'a'], [19, 13, 'b'], [3, 10, 'b'], [11, 5, 'a'],
+  ];
+  for (const [x, y, v] of robots) m.o(x, y, `robot-fallen-${v}`);
+  for (const [x, y] of [[7, 11], [15, 13], [18, 6], [2, 15]]) m.o(x, y, 'robot-head');
+  m.o(2, 5, 'lamp-post').o(20, 9, 'lamp-post').o(6, 20, 'car-wreck').o(14, 21, 'tires');
+  // smietnik (poludniowy wschod) - tu zalegly sie szczury
+  m.fillG(21, 11, 10, 12, 'dirt').scatterG('rubble-ground', 0.25, [21, 11, 10, 12]);
+  for (const x of [22, 23, 28, 29]) m.o(x, 11, 'trash-container');
+  for (const x of [21, 22, 26, 27]) m.o(x, 17, 'trash-container');
+  m.scatterO('trash-bags', 9, [21, 12, 10, 10], ['dirt', 'rubble-ground']);
+  m.scatterO('barrel-toxic', 2, [24, 18, 6, 4], ['dirt', 'rubble-ground']);
+  m.spawn('szczur-zmutowany', 21, 12, 10, 5, 6);
+  m.spawn('szczur-zmutowany', 17, 18, 11, 5, 6);
+  // ogrodzenie i wyjscie na wschod (zaulek do Osady)
+  m.border('fence', [[31, 20], [31, 21], [31, 22]]);
+  m.fillO(0, 0, 32, 4, 'wall-brick');
+  for (const x of [3, 6, 12, 16, 20, 24, 28]) m.o(x, 2, 'window-wall');
+  m.o(8, 3, 'doorway');
+  for (const y of [20, 21, 22]) { m.clear(29, y, 2); m.portal(31, y, 'osada', 1, y - 6, 'Osada Reboot'); }
+  m.clear(8, 4, 1, 2).clear(13, 10);
+  return m.build(8, 5);
+}
+
+export const MAPS = [dom(), podworze(), osada(), ruiny()];
 
 /** Podglad ASCII do szybkiej kontroli przechodnosci. */
 export function ascii(map, solid) {
@@ -155,6 +208,7 @@ export function ascii(map, solid) {
       const gr = map.layers.ground[i];
       if (map.portals.some(p => p.x === x && p.y === y)) s += '>';
       else if (x === map.spawnX && y === map.spawnY) s += '@';
+      else if ((map.spawns || []).some(sp => x >= sp.x && y >= sp.y && x < sp.x + sp.w && y < sp.y + sp.h) && !(o && solid.has(o))) s += 'r';
       else if (o && solid.has(o)) s += '#';
       else if (solid.has(gr)) s += '~';
       else s += o ? ',' : '.';

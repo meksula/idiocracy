@@ -25,7 +25,7 @@ public class ContentService {
     public ContentService(ContentCache cache, ObjectMapper mapper, ApplicationEventPublisher events,
                           TileDefRepository tiles, RaceRepository races, CharacterClassRepository classes,
                           ItemTemplateRepository items, GameMapRepository maps, NpcRepository npcs,
-                          QuestRepository quests) {
+                          QuestRepository quests, MonsterTemplateRepository monsters) {
         this.cache = cache;
         this.mapper = mapper;
         this.events = events;
@@ -36,11 +36,12 @@ public class ContentService {
                 ContentType.ITEMS, items,
                 ContentType.MAPS, maps,
                 ContentType.NPCS, npcs,
-                ContentType.QUESTS, quests);
+                ContentType.QUESTS, quests,
+                ContentType.MONSTERS, monsters);
     }
 
     public record Bootstrap(List<TileDef> tiles, List<ItemTemplate> items, List<Race> races,
-                            List<CharacterClass> classes) {
+                            List<CharacterClass> classes, List<MonsterTemplate> monsters) {
     }
 
     /** Wszystko, czego klient potrzebuje do renderowania i kreatora postaci. */
@@ -53,7 +54,8 @@ public class ContentService {
                 s.races().values().stream().filter(Race::isPlayable)
                         .sorted(Comparator.comparingInt(Race::getSortOrder)).toList(),
                 s.classes().values().stream().filter(CharacterClass::isPlayable)
-                        .sorted(Comparator.comparingInt(CharacterClass::getSortOrder)).toList());
+                        .sorted(Comparator.comparingInt(CharacterClass::getSortOrder)).toList(),
+                s.monsters().values().stream().sorted(Comparator.comparing(MonsterTemplate::getCode)).toList());
     }
 
     @Transactional(readOnly = true)

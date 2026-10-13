@@ -1,12 +1,80 @@
 [
   {
+    "code": "cisza-po-burzy",
+    "title": "Cisza po burzy",
+    "description": "Na podwórzu kamienicy ktoś chodzi między martwymi robotami. Sprawdź, kto to.",
+    "giverNpc": null,
+    "minLevel": 1,
+    "repeatable": false,
+    "autoStart": true,
+    "sortOrder": 0,
+    "steps": [
+      {
+        "type": "VISIT",
+        "target": "podworze",
+        "x": 8,
+        "y": 5,
+        "radius": 3,
+        "text": "Wyjdź z mieszkania na podwórze.",
+        "give": [
+          {
+            "code": "noz-kuchenny",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "type": "TALK",
+        "target": "nieznajomy",
+        "text": "Sprawdź, kim jest człowiek między robotami.",
+        "dialog": "* Mężczyzna w ciemnym płaszczu klęczy przy jednym z robotów. Otworzył mu klatkę piersiową i ostrożnie wykręca coś ze środka.\n> Hej. Co ty robisz?\nZakapturzony mężczyzna: Nie podchodź.\n* Nie odwraca się. W dłoni trzyma płytkę wielkości karty. Jej krawędź słabo pulsuje zielonym światłem.\n> One jeszcze działają?\nZakapturzony mężczyzna: Te? Nie. Ale to, co mają w środku, nie umarło razem z nimi.\n* Wsuwa płytkę do kieszeni i pierwszy raz na ciebie patrzy. Ma zmęczone, przekrwione oczy.\nZakapturzony mężczyzna: Nie widziałeś mnie. Rozumiesz?\n* Zrywa się i biegnie w stronę śmietników. Zanim zdążysz zareagować, znika między kontenerami.\n* Obok otwartego robota leży płytka. Musiała wypaść mu z kieszeni.",
+        "give": [
+          {
+            "code": "plytka-neuronowa",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "type": "KILL",
+        "target": "szczur-zmutowany",
+        "count": 6,
+        "text": "Nieznajomy uciekł w stronę śmietników. Przebij się przez zmutowane szczury."
+      },
+      {
+        "type": "VISIT",
+        "target": "podworze",
+        "x": 29,
+        "y": 21,
+        "radius": 2,
+        "text": "Sprawdź zaułek za śmietnikami, w którym zniknął."
+      },
+      {
+        "type": "TALK",
+        "target": "soltys-zenon",
+        "text": "Zaułek prowadzi do Osady Reboot. Pokaż płytkę komuś, kto może wiedzieć więcej.",
+        "dialog": "* Pokazujesz Zenonowi płytkę. Długo obraca ją w palcach.\nSołtys Zenon: Skąd to masz?\n> Z robota na moim podwórzu. Wykręcał je jakiś człowiek w płaszczu. Uciekł, kiedy mnie zobaczył.\nSołtys Zenon: Nie ty pierwszy go widziałeś. Od dnia burzy ktoś chodzi po mieście i otwiera maszyny. Zawsze zabiera tylko to.\n* Zielony punkt na krawędzi płytki mruga raz, potem gaśnie.\nSołtys Zenon: Zatrzymaj ją. I jeśli spotkasz go znowu — nie podchodź sam."
+      }
+    ],
+    "rewards": {
+      "ccoin": 15,
+      "xp": 150,
+      "items": []
+    },
+    "dialog": {
+      "offer": "* Od burzy minęło dziewięć dni.\n* Prąd wraca na kilka minut dziennie. Telefon milczy. Asystent, który przez całe życie odpowiadał na każde twoje pytanie, nie odezwał się ani razu.\n* Na podwórzu wciąż leżą roboty serwisowe. Upadły tam, gdzie zastała je burza, i nikt ich nie zabrał.\n* Dziś rano ktoś zaczął między nimi chodzić.\n* Przy drzwiach bierzesz z szuflady stary nóż kuchenny. Na wszelki wypadek.",
+      "progress": "",
+      "complete": "* Osada jest pierwszym miejscem od dziewięciu dni, w którym słychać ludzkie głosy."
+    }
+  },
+  {
     "code": "pierwsze-mysli",
     "title": "Pierwsze myśli",
     "description": "Sołtys Zenon chce sprawdzić, czy umiesz jeszcze samodzielnie myśleć.",
     "giverNpc": "soltys-zenon",
     "minLevel": 1,
     "repeatable": false,
-    "sortOrder": 1,
+    "sortOrder": 11,
     "steps": [
       {
         "type": "TALK",
@@ -26,7 +94,7 @@
         "type": "TALK",
         "target": "soltys-zenon",
         "text": "Wróć do Sołtysa Zenona i powiedz mu, co zobaczyłeś.",
-        "dialog": "I co? Czerwona dioda i napis NO SIGNAL. Od pięciu lat. Ludzie nadal przychodzą i pytają go o pogodę. Ty pierwszy przyszedłeś i POMYŚLAŁEŚ. To już coś."
+        "dialog": "I co? Czerwona dioda i napis NO SIGNAL. Od dnia burzy. Ludzie nadal przychodzą i pytają go o pogodę. Ty pierwszy przyszedłeś i POMYŚLAŁEŚ. To już coś."
       }
     ],
     "rewards": {
@@ -56,7 +124,7 @@
     "giverNpc": "zbieraczka-ola",
     "minLevel": 1,
     "repeatable": true,
-    "sortOrder": 2,
+    "sortOrder": 12,
     "steps": [
       {
         "type": "VISIT",
@@ -100,7 +168,7 @@
     "giverNpc": "mechanik-rysiek",
     "minLevel": 2,
     "repeatable": false,
-    "sortOrder": 3,
+    "sortOrder": 13,
     "steps": [
       {
         "type": "COLLECT",

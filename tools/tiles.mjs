@@ -378,6 +378,99 @@ const OBJECTS = [
       return sprite(g);
     },
   },
+  // ---- 2074: martwe roboty serwisowe i zabudowa mieszkalna ----
+  {
+    code: 'robot-fallen-a', name: 'Martwy robot (leży)', solid: false, make: () => {
+      const g = new Grid(T, T, '.');
+      g.rect(10, 8, 5, 2, '5').hline(10, 10, 5, '4').rect(14, 7, 2, 4, '4');
+      g.set(10, 8, '3').set(12, 8, '3');
+      g.rect(5, 6, 6, 6, '6').bevel(5, 6, 6, 6, '7', '4');
+      g.rect(7, 8, 2, 2, '2').set(7, 8, 'c');
+      g.ellipse(3, 9, 2, 2, '6').vline(1, 8, 3, '1').set(1, 9, 'c');
+      g.line(7, 5, 9, 2, '5').set(9, 1, '4').set(7, 5, '3');
+      g.line(8, 12, 9, 13, '5');
+      g.outline().shadow(14, 2, 14);
+      return sprite(g);
+    },
+  },
+  {
+    code: 'robot-fallen-b', name: 'Martwy robot (otwarty)', solid: false, make: () => {
+      const g = new Grid(T, T, '.');
+      g.rect(1, 8, 5, 2, '5').hline(1, 10, 5, '4').rect(0, 7, 2, 4, '4');
+      g.rect(5, 6, 6, 6, '6').bevel(5, 6, 6, 6, '7', '4');
+      g.rect(6, 7, 4, 4, '0').set(7, 8, 'R').set(8, 9, 'o').set(6, 10, 'x').set(9, 7, 'R');
+      g.ellipse(12, 9, 2, 2, '6').vline(14, 8, 3, '1').set(14, 9, 'c');
+      g.line(8, 12, 6, 14, '5').set(6, 14, '4');
+      g.outline().shadow(14, 1, 14);
+      return sprite(g);
+    },
+  },
+  {
+    code: 'robot-slumped', name: 'Martwy robot (siedzi)', solid: true, make: () => {
+      const g = new Grid(T, T, '.');
+      g.ellipse(8, 3, 3, 2, '6').hline(6, 3, 5, '1').set(7, 3, 'c');
+      g.rect(5, 6, 7, 5, '6').bevel(5, 6, 7, 5, '7', '4').rect(7, 7, 3, 2, '3');
+      g.rect(3, 7, 2, 5, '5').rect(12, 7, 2, 5, '5');
+      g.rect(5, 11, 3, 4, '5').rect(9, 11, 3, 4, '5').hline(5, 14, 3, '4').hline(9, 14, 3, '4');
+      g.outline();
+      return sprite(g);
+    },
+  },
+  {
+    code: 'robot-head', name: 'Głowa robota', solid: false, make: () => {
+      const g = new Grid(T, T, '.');
+      g.ellipse(8, 10, 4, 3, '6').hline(5, 9, 7, '1').set(6, 9, 'c').set(10, 9, 'c');
+      g.hline(5, 12, 7, '4').set(4, 11, '5');
+      g.line(11, 13, 14, 14, 'R').set(14, 14, 'o');
+      g.outline().shadow(14, 4, 12);
+      return sprite(g);
+    },
+  },
+  {
+    code: 'trash-container', name: 'Kontener na śmieci', solid: true, make: () => {
+      const g = new Grid(T, T, '.');
+      g.rect(1, 4, 14, 10, 'g').bevel(1, 4, 14, 10, 'G', '1');
+      g.rect(0, 3, 16, 2, '1').hline(0, 3, 16, '2');
+      for (let x = 3; x < 14; x += 3) g.vline(x, 6, 7, '1');
+      g.rect(2, 14, 2, 2, '0').rect(12, 14, 2, 2, '0');
+      g.set(5, 2, '2').set(9, 1, 'B').set(10, 2, '2');
+      g.outline();
+      return sprite(g);
+    },
+  },
+  {
+    code: 'doorway', name: 'Drzwi', solid: false, make: () => {
+      const g = new Grid(T, T, '.');
+      g.rect(2, 0, 12, 16, 'b').rect(4, 2, 8, 14, 'B').bevel(4, 2, 8, 14, 'k', 'b');
+      g.set(10, 9, 'y').hline(4, 15, 8, '1');
+      return sprite(g);
+    },
+  },
+  {
+    code: 'window-wall', name: 'Ściana z oknem', solid: true, make: () => {
+      const g = new Grid(T, T, '3');
+      for (let row = 0; row < 4; row++) {
+        const off = row % 2 ? 4 : 0;
+        for (let bx = -off; bx < T; bx += 8) {
+          g.rect(bx + 1, row * 4 + 1, 7, 3, 'R').hline(bx + 1, row * 4 + 1, 7, 'o').hline(bx + 1, row * 4 + 3, 7, 'r');
+        }
+      }
+      g.rect(3, 3, 10, 9, '5').rect(4, 4, 8, 7, 'c').vline(8, 4, 7, '5').hline(4, 7, 8, '5');
+      g.set(5, 5, 'C').set(9, 5, 'C').set(6, 5, 'C');
+      g.hline(2, 12, 12, '6');
+      return sprite(g);
+    },
+  },
+  {
+    code: 'kitchen-counter', name: 'Blat kuchenny', solid: true, make: () => {
+      const g = new Grid(T, T, '.');
+      g.rect(0, 3, 16, 12, '2').rect(0, 3, 16, 4, '4').hline(0, 3, 16, '5');
+      g.rect(5, 4, 6, 2, 'U').set(6, 4, 'n');
+      g.vline(8, 8, 6, '1').set(6, 11, '4').set(10, 11, '4');
+      g.outline();
+      return sprite(g);
+    },
+  },
 ];
 
 export const TILES = [

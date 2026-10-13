@@ -1,4 +1,4 @@
-// Klient gry: stan swiata, siec (WebSocket), sterowanie i petla renderowania.
+// Klient gry: stan swiata, siec (WebSocket), sterowanie, walka i petla renderowania.
 // Ruch jest przewidywany lokalnie (plynnosc), ale serwer ma ostatnie slowo ("correct").
 import { api, requireSession } from '../api.js';
 import { clearSpriteCache, spriteCanvas } from '../palette.js';
@@ -11,6 +11,9 @@ const KEYMAP = {
 };
 const TALK_RANGE = 2;
 const BUBBLE_MS = 5000;
+const FLOAT_MS = 1000;
+const FLEE_TILES = 7;
+const FLEE_STEP_MS = 115;
 
 class Game {
   constructor() {
@@ -19,12 +22,18 @@ class Game {
     if (!this.characterId) location.href = '/characters.html';
     this.tiles = new Map();
     this.items = new Map();
+    this.monsterTpl = new Map();
     this.tileColors = new Map();
     this.contentVersion = 0;
     this.map = null;
     this.npcPos = new Map();
     this.marks = {};
     this.players = new Map();
+    this.monsters = new Map();
+    this.ghosts = [];
+    this.pendingFlee = [];
+    this.floats = [];
+    this.target = null;
     this.me = null;
     this.self = null;
     this.inventory = [];
@@ -36,6 +45,7 @@ class Game {
     this.showNames = false;
     this.ws = null;
     this.hud = new Hud(this);
+    this.hud.onDialogClosed = () => this.releaseFlee();
     this.renderer = new Renderer(document.getElementById('world'), this);
   }
 
@@ -53,10 +63,12 @@ class Game {
     const c = await api('/api/content/bootstrap');
     this.tiles = new Map(c.tiles.map(t => [t.code, t]));
     this.items = new Map(c.items.map(i => [i.code, i]));
+    this.monsterTpl = new Map((c.monsters || []).map(m => [m.code, m]));
     this.contentVersion++;
     this.tileColors.clear();
     clearSpriteCache('tile:');
     clearSpriteCache('icon:');
+    clearSpriteCache('mon:');
   }
 
   // ================================================================ siec
@@ -71,7 +83,7 @@ class Game {
       document.getElementById('disconnected').classList.remove('hidden');
       document.getElementById('disc-reason').textContent = dup
         ? 'Ta postać weszła do gry z innego okna.'
-        : 'Połączenie z serwerem zostało przerwane. Burza magnetyczna?';
+        : 'Połączenie z serwerem zostało przerwane.';
     };
   }
 
@@ -88,7 +100,7 @@ class Game {
     switch (m.t) {
       case 'welcome':
         document.title = `${m.you.name} — ${m.title}`;
-        this.hud.log('system', `Witaj, ${m.you.name}. WASD/strzałki lub klik — ruch, E — rozmowa, Enter — czat.`);
+        this.hud.log('system', `Witaj, ${m.you.name}. WASD lub klik — ruch, E — rozmowa, klik na wroga lub Spacja — atak, H — pomoc.`);
         this.inventory = m.inventory;
         this.quests = m.quests;
         this.enterMap(m);
@@ -102,9 +114,18 @@ class Game {
       case 'mapReload':
         this.setMap(m.map);
         this.marks = m.marks;
+        if (m.monsters) this.setMonsters(m.monsters);
+        break;
+      case 'npcs':
+        this.updateNpcs(m.npcs);
+        this.marks = m.marks;
         break;
       case 'self':
         this.applySelf(m.you);
+        break;
+      case 'hp':
+        if (this.self) { this.self.hp = m.hp; this.self.maxHp = m.maxHp; this.hud.renderSelf(); }
+        if (this.me) { this.me.hp = m.hp; this.me.maxHp = m.maxHp; }
         break;
       case 'join':
         this.players.set(m.player.id, this.entity(m.player));
@@ -119,9 +140,7 @@ class Game {
       }
       case 'moved': {
         const p = this.players.get(m.id);
-        if (!p) break;
-        const cur = this.renderPos(p, now);
-        Object.assign(p, { fromX: cur.x, fromY: cur.y, x: m.x, y: m.y, dir: m.dir, moveStart: now, moveDur: m.ms, step: p.step + 1 });
+        if (p) this.slide(p, m, now);
         break;
       }
       case 'face': {
@@ -133,6 +152,30 @@ class Game {
         Object.assign(this.me, { x: m.x, y: m.y, fromX: m.x, fromY: m.y, moveStart: 0, dir: m.dir });
         this.path = [];
         break;
+      // ---------------------------------------------------------- walka
+      case 'mspawn':
+        this.monsters.set(m.monster.id, this.entity(m.monster));
+        break;
+      case 'mmove': {
+        const mo = this.monsters.get(m.id);
+        if (mo) this.slide(mo, m, now);
+        break;
+      }
+      case 'mdie': {
+        const mo = this.monsters.get(m.id);
+        if (mo) this.ghosts.push({ kind: 'corpse', e: mo, start: now, until: now + 700 });
+        this.monsters.delete(m.id);
+        if (this.target === m.id) this.setTarget(null, false);
+        break;
+      }
+      case 'hit':
+        this.onHit(m, now);
+        break;
+      case 'target':
+        this.target = m.id;
+        this.hud.renderTarget();
+        break;
+      // ----------------------------------------------------------- reszta
       case 'chat': {
         const who = m.id === this.me?.id ? this.me : this.players.get(m.id);
         if (who) who.bubble = { text: m.text, until: now + BUBBLE_MS };
@@ -160,7 +203,7 @@ class Game {
         this.hud.renderInventory();
         break;
       case 'content':
-        if (['tiles', 'items'].includes(m.type)) {
+        if (['tiles', 'items', 'monsters'].includes(m.type)) {
           this.loadContent().then(() => { this.hud.renderInventory(); this.redrawMinimap(); });
         }
         this.hud.log('system', `[edytor] zaktualizowano: ${m.type}/${m.code}`);
@@ -176,10 +219,15 @@ class Game {
   enterMap(m) {
     this.players.clear();
     for (const p of m.players) this.players.set(p.id, this.entity(p));
+    this.setMonsters(m.monsters || []);
+    this.ghosts = [];
+    this.pendingFlee = [];
+    this.floats = [];
     this.me = this.entity(m.you);
     this.marks = m.marks || {};
     this.path = [];
     this.pendingTalk = null;
+    this.setTarget(null, false);
     this.hud.closeDialog();
     this.setMap(m.map);
     this.applySelf(m.you);
@@ -191,15 +239,92 @@ class Game {
     this.redrawMinimap();
   }
 
+  setMonsters(list) {
+    this.monsters = new Map(list.map(mo => [mo.id, this.entity(mo)]));
+    if (this.target && !this.monsters.has(this.target)) this.setTarget(null, false);
+  }
+
+  /** NPC, ktorzy znikneli z listy (np. uciekli w ramach misji), odbiegaja z ekranu. */
+  updateNpcs(npcs) {
+    const now = new Set(npcs.map(n => n.code));
+    for (const n of this.map.npcs) if (!now.has(n.code)) this.pendingFlee.push(n);
+    this.map.npcs = npcs;
+    this.npcPos = new Map(npcs.map(n => [`${n.x},${n.y}`, n]));
+    if (!this.hud.dialogOpen) this.releaseFlee();
+  }
+
+  /** Uciekajacy NPC biegnie do swojego punktu ucieczki (A*), a bez niego - prosto od gracza. */
+  releaseFlee() {
+    const t = performance.now();
+    for (const n of this.pendingFlee) {
+      let dirs = null;
+      if (n.flee) dirs = findPath(n.x, n.y, n.flee.x, n.flee.y, (a, b) => this.tileFree(a, b), { maxNodes: 3000 });
+      if (!dirs || !dirs.length) {
+        const dx = n.x - this.me.x, dy = n.y - this.me.y;
+        const dir = Math.abs(dx) > Math.abs(dy) ? (dx >= 0 ? 'E' : 'W') : (dy >= 0 ? 'S' : 'N');
+        dirs = Array(FLEE_TILES).fill(dir);
+      }
+      const points = [{ x: n.x, y: n.y, dir: dirs[0] }];
+      for (const d of dirs) {
+        const last = points[points.length - 1];
+        points.push({ x: last.x + DELTA[d][0], y: last.y + DELTA[d][1], dir: d });
+      }
+      this.ghosts.push({ kind: 'flee', e: n, points, start: t, until: t + dirs.length * FLEE_STEP_MS });
+    }
+    this.pendingFlee = [];
+  }
+
   applySelf(you) {
     this.self = you;
-    if (this.me) Object.assign(this.me, { app: you.app, level: you.level, ms: you.ms, name: you.name });
+    if (this.me) Object.assign(this.me, { app: you.app, level: you.level, ms: you.ms, name: you.name, hp: you.hp, maxHp: you.maxHp });
     this.hud.renderSelf();
   }
 
   entity(p) {
     return { ...p, fromX: p.x, fromY: p.y, moveStart: 0, moveDur: p.ms || 260, step: 0, bubble: null };
   }
+
+  slide(e, m, now) {
+    const cur = this.renderPos(e, now);
+    Object.assign(e, { fromX: cur.x, fromY: cur.y, x: m.x, y: m.y, dir: m.dir, moveStart: now, moveDur: m.ms, step: e.step + 1 });
+  }
+
+  // ============================================================== walka
+  onHit(m, now) {
+    let e;
+    if (m.kind === 'm') e = this.monsters.get(m.id);
+    else e = m.id === this.me?.id ? this.me : this.players.get(m.id);
+    if (!e) return;
+    e.hp = m.hp;
+    e.maxHp = m.maxHp;
+    e.hitAt = now;
+    const mine = m.kind === 'p' && m.id === this.me.id;
+    const pos = this.renderPos(e, now);
+    this.floats.push({ x: pos.x, y: pos.y, text: `-${m.dmg}`, color: mine ? 'X' : 'y', start: now });
+    if (mine && this.self) { this.self.hp = m.hp; this.self.maxHp = m.maxHp; this.hud.renderSelf(); }
+    if (m.kind === 'm' && m.id === this.target) this.hud.renderTarget();
+  }
+
+  setTarget(id, notify = true) {
+    this.target = id;
+    if (notify) this.send({ t: 'attack', id });
+    if (!id) this.path = this.pendingTalk ? this.path : [];
+    this.hud.renderTarget();
+  }
+
+  attackNearest() {
+    let best = null, bestD = Infinity;
+    for (const mo of this.monsters.values()) {
+      const d = Math.max(Math.abs(mo.x - this.me.x), Math.abs(mo.y - this.me.y));
+      if (d < bestD && mo.id !== this.target) { best = mo; bestD = d; }
+    }
+    if (!best && this.target) return;
+    if (!best || bestD > 9) { this.hud.log('system', 'Nie widzisz w pobliżu nikogo, kogo można zaatakować.'); return; }
+    this.pendingTalk = null;
+    this.setTarget(best.id);
+  }
+
+  adjacent(e) { return Math.max(Math.abs(e.x - this.me.x), Math.abs(e.y - this.me.y)) <= 1; }
 
   // ============================================================== swiat
   renderPos(e, now) {
@@ -219,15 +344,24 @@ class Game {
 
   npcAt(x, y) { return this.npcPos.get(`${x},${y}`); }
 
-  walkable(x, y) {
+  monsterAt(x, y) {
+    for (const mo of this.monsters.values()) if (mo.x === x && mo.y === y) return mo;
+    return null;
+  }
+
+  /** Czy kafelki (grunt + obiekt) pozwalaja wejsc na pole. */
+  tileFree(x, y) {
     const m = this.map;
     if (!m || x < 0 || y < 0 || x >= m.width || y >= m.height) return false;
     const i = y * m.width + x;
     const g = this.tiles.get(m.ground[i]);
     if (!g || g.solid) return false;
     const o = m.objects[i] && this.tiles.get(m.objects[i]);
-    if (o && o.solid) return false;
-    return !this.npcAt(x, y);
+    return !(o && o.solid);
+  }
+
+  walkable(x, y) {
+    return this.tileFree(x, y) && !this.npcAt(x, y) && !this.monsterAt(x, y);
   }
 
   isPortal(x, y) { return this.map.portals.some(p => p.x === x && p.y === y); }
@@ -251,14 +385,29 @@ class Game {
   redrawMinimap() { if (this.me) drawMinimap(document.getElementById('minimap'), this); }
 
   // ============================================================== ruch
-  tick(now) {
+  tick(rafNow) {
     if (!this.map || !this.me) return;
+    const now = Math.max(rafNow, performance.now());
     if (!this.isMoving(this.me, now)) {
-      const dir = this.held.length ? this.held[this.held.length - 1] : this.path.shift();
+      let dir = this.held.length ? this.held[this.held.length - 1] : null;
+      if (!dir) {
+        const tgt = this.target && this.monsters.get(this.target);
+        if (tgt && !this.adjacent(tgt) && !this.path.length) {
+          this.path = findPath(this.me.x, this.me.y, tgt.x, tgt.y, (a, b) => this.walkable(a, b), { adjacent: true, maxNodes: 1500 }) || [];
+        }
+        if (tgt && this.adjacent(tgt)) this.path = [];
+        dir = this.path.shift();
+      }
       if (dir) this.step(dir, now);
       else if (this.pendingTalk && !this.path.length) this.tryTalk(this.pendingTalk);
     }
-    this.renderer.draw(now);
+    this.ghosts = this.ghosts.filter(g => g.until > now);
+    this.floats = this.floats.filter(f => now - f.start < FLOAT_MS);
+    try {
+      this.renderer.draw(now);
+    } catch (e) {
+      if (!this.drawErrorLogged) { console.error('Błąd renderowania', e); this.drawErrorLogged = true; }
+    }
     if (now - (this.lastHud || 0) > 120) {
       this.lastHud = now;
       this.hud.setLocation(this.map.name, this.me.x, this.me.y);
@@ -283,13 +432,16 @@ class Game {
 
   walkTo(x, y) {
     this.pendingTalk = null;
+    const mo = this.monsterAt(x, y);
+    if (mo) { this.setTarget(mo.id); return; }
+    if (this.target) this.setTarget(null);
     const npc = this.npcAt(x, y);
     if (npc) {
       if (this.inRange(npc)) { this.tryTalk(npc); return; }
       this.pendingTalk = npc;
     }
-    const target = this.walkable(x, y) ? { x, y, adjacent: false } : { x, y, adjacent: true };
-    const p = findPath(this.me.x, this.me.y, target.x, target.y, (a, b) => this.walkable(a, b), { adjacent: target.adjacent });
+    const adjacent = !this.walkable(x, y);
+    const p = findPath(this.me.x, this.me.y, x, y, (a, b) => this.walkable(a, b), { adjacent });
     if (p) this.path = p;
     else this.pendingTalk = null;
   }
@@ -307,7 +459,7 @@ class Game {
 
   talkNearest() {
     const npcs = this.map.npcs.filter(n => this.inRange(n));
-    if (!npcs.length) { this.hud.log('system', 'Nikogo nie ma w pobliżu. Pogadaj ze sobą — to też ćwiczy mózg.'); return; }
+    if (!npcs.length) { this.hud.log('system', 'Nikogo nie ma w pobliżu.'); return; }
     const [dx, dy] = DELTA[this.me.dir];
     npcs.sort((a, b) => {
       const da = Math.abs(a.x - this.me.x - dx) + Math.abs(a.y - this.me.y - dy);
@@ -344,8 +496,22 @@ class Game {
         } else if (e.key === 'Escape') chatInput.blur();
         return;
       }
-      if (e.key === 'Enter') { chatInput.focus(); e.preventDefault(); return; }
-      if (e.key === 'Escape') { this.hud.closeDialog(); document.getElementById('help').classList.add('hidden'); return; }
+      if (e.key === 'Enter') {
+        if (this.hud.dialogOpen) { this.hud.advanceDialog(); e.preventDefault(); return; }
+        chatInput.focus(); e.preventDefault(); return;
+      }
+      if (e.key === 'Escape') {
+        if (this.hud.dialogOpen) this.hud.closeDialog();
+        else if (this.target) this.setTarget(null);
+        document.getElementById('help').classList.add('hidden');
+        return;
+      }
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (this.hud.dialogOpen) this.hud.advanceDialog();
+        else this.attackNearest();
+        return;
+      }
       if (e.code === 'KeyE') { this.talkNearest(); return; }
       if (e.code === 'KeyH' || e.key === '?') { document.getElementById('help').classList.toggle('hidden'); return; }
       if (e.code === 'AltLeft' || e.code === 'AltRight') { this.showNames = true; e.preventDefault(); return; }
@@ -365,8 +531,9 @@ class Game {
     addEventListener('blur', () => { this.held = []; this.showNames = false; });
 
     canvas.addEventListener('mousemove', (e) => {
-      this.renderer.hover = this.renderer.screenToTile(e.clientX, e.clientY);
-      canvas.style.cursor = this.npcAt(this.renderer.hover.x, this.renderer.hover.y) ? 'pointer' : 'crosshair';
+      const t = this.renderer.screenToTile(e.clientX, e.clientY);
+      this.renderer.hover = t;
+      canvas.style.cursor = this.monsterAt(t.x, t.y) ? 'crosshair' : this.npcAt(t.x, t.y) ? 'pointer' : 'default';
     });
     canvas.addEventListener('mouseleave', () => { this.renderer.hover = null; });
     canvas.addEventListener('mousedown', (e) => {

@@ -1,0 +1,74 @@
+[
+ {
+  "code": "szczur-zmutowany",
+  "name": "Zmutowany szczur",
+  "level": 1,
+  "maxHp": 14,
+  "attack": 2,
+  "defense": 0,
+  "xp": 10,
+  "ccoinMin": 0,
+  "ccoinMax": 1,
+  "aggressive": true,
+  "aggroRange": 2,
+  "moveDelayMs": 420,
+  "attackDelayMs": 1500,
+  "respawnSec": 20,
+  "loot": [
+   {
+    "code": "ogon-szczura",
+    "chance": 45,
+    "min": 1,
+    "max": 1
+   },
+   {
+    "code": "konserwa",
+    "chance": 4,
+    "min": 1,
+    "max": 1
+   }
+  ],
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "................",
+     "0...............",
+     "S0.........0....",
+     "S0....00..0S0...",
+     "0S0.00lB000SS0..",
+     "0S00BGGBBBBBly0.",
+     ".0SBBBBBBGBBBBB0",
+     ".0BBGBBBBBBBBBSx",
+     "..0BBBBBBBBBB070",
+     "...0kkkkkkk00.0.",
+     "....0bkkkkb0....",
+     "....0b0000b0....",
+     ".....0....0....."
+    ],
+    [
+     "................",
+     "................",
+     "................",
+     "................",
+     "0...............",
+     "S0.........0....",
+     "S0....00..0S0...",
+     "0S0.00lB000SS0..",
+     "0S00BGGBBBBBly0.",
+     ".0SBBBBBBGBBBBB0",
+     ".0BBGBBBBBBBBBSx",
+     "..0BBBBBBBBBB070",
+     "...0kkkkkkk00.0.",
+     "..0b0kkkbk00....",
+     "...0b0000b0b0...",
+     "....0....0.0...."
+    ]
+   ]
+  }
+ }
+]

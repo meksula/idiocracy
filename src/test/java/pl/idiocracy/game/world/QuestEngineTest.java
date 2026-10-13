@@ -58,7 +58,7 @@ class QuestEngineTest {
 
         ContentCache cache = new ContentCache(emptyRepo(TileDefRepository.class), emptyRepo(RaceRepository.class),
                 emptyRepo(CharacterClassRepository.class), emptyRepo(ItemTemplateRepository.class),
-                emptyRepo(GameMapRepository.class), npcRepo, questRepo);
+                emptyRepo(GameMapRepository.class), npcRepo, questRepo, emptyRepo(pl.idiocracy.game.content.MonsterTemplateRepository.class));
         cache.reload();
         when(characters.saveQuest(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -122,7 +122,7 @@ class QuestEngineTest {
     }
 
     private static QuestStep step(QuestStepType type, String target, Integer x, Integer y, Integer count) {
-        return new QuestStep(type, target, x, y, 0, count, true, "cel", "dialog");
+        return new QuestStep(type, target, x, y, 0, count, true, "cel", "dialog", null);
     }
 
     private static Quest quest(String code, String giver, QuestStep... steps) {

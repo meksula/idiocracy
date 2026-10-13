@@ -11,7 +11,7 @@ public final class StatsCalculator {
     private StatsCalculator() {
     }
 
-    public record Derived(Stats attributes, int maxHp, int attack, int defense, int moveDelayMs) {
+    public record Derived(Stats attributes, int maxHp, int attack, int defense, int moveDelayMs, int attackDelayMs) {
     }
 
     public static Derived derive(Stats race, Stats clazz, int level, Collection<ItemTemplate> equipped,
@@ -27,7 +27,8 @@ public final class StatsCalculator {
         }
         int maxHp = 40 + attrs.vitality() * 6 + level * 4;
         int moveDelay = clamp(baseMoveDelayMs - attrs.agility() * 4, 150, 450);
-        return new Derived(attrs, maxHp, attack + attrs.strength() / 2, defense, moveDelay);
+        int attackDelay = clamp(1300 - attrs.agility() * 15, 600, 1800);
+        return new Derived(attrs, maxHp, attack + attrs.strength() / 2, defense, moveDelay, attackDelay);
     }
 
     /** Ile XP trzeba zebrac na obecnym poziomie, zeby awansowac. */

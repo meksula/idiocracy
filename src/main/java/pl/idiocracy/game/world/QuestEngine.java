@@ -23,6 +23,7 @@ import pl.idiocracy.game.content.QuestStepType;
 /**
  * Silnik misji: misja to lista krokow (TALK/VISIT/COLLECT/KILL) przechodzonych po kolei.
  * Kroki "automatyczne" (VISIT, COLLECT) sa sprawdzane po kazdym istotnym zdarzeniu.
+ * Krok moze wreczyc przedmioty (give), a NPC moze byc widoczny tylko na danym etapie misji.
  */
 @Component
 public class QuestEngine {
@@ -44,6 +45,7 @@ public class QuestEngine {
 
     // ------------------------------------------------------------------ dialog
 
+    /** Wynik rozmowy; po wyslaniu dialogu wolajacy wywoluje afterQuestChange (kolejnosc ma znaczenie dla klienta). */
     Map<String, Object> talk(OnlinePlayer p, Npc npc) {
         List<String> lines = new ArrayList<>();
         boolean progressed = false;
@@ -52,7 +54,7 @@ public class QuestEngine {
             QuestStep step = current(q, cq);
             if (step != null && step.type() == QuestStepType.TALK && npc.getCode().equals(step.target())) {
                 lines.add(orDefault(step.dialog(), "Aha. No dobra."));
-                cq.advance();
+                completeStep(p, q, cq, step, lines);
                 lines.addAll(settle(p, q, cq));
                 characters.saveQuest(cq);
                 progressed = true;
@@ -68,8 +70,6 @@ public class QuestEngine {
                             + (step != null && step.text() != null ? " (" + step.text() + ")" : ""));
                 }
             }
-        } else {
-            afterQuestChange(p);
         }
         List<Map<String, Object>> offers = new ArrayList<>();
         for (Quest q : content.questsFrom(npc.getCode())) {
@@ -92,10 +92,35 @@ public class QuestEngine {
         if (!isAvailable(p, q)) {
             throw GameException.badRequest("Misja niedostępna");
         }
-        CharacterQuest cq = p.quests.get(questCode);
+        start(p, q);
+        afterQuestChange(p);
+    }
+
+    /**
+     * Przydziela misje oznaczone jako autoStart (np. wprowadzenie fabularne).
+     * Zwraca okna narracji do pokazania graczowi.
+     */
+    List<Map<String, Object>> autoStart(OnlinePlayer p) {
+        List<Map<String, Object>> intros = new ArrayList<>();
+        for (Quest q : content.get().quests().values().stream()
+                .sorted(Comparator.comparingInt(Quest::getSortOrder)).toList()) {
+            if (q.isAutoStart() && q.getGiverNpc() == null && isAvailable(p, q)) {
+                start(p, q);
+                String offer = q.getDialog().offer();
+                if (offer != null && !offer.isBlank()) {
+                    intros.add(Msg.of("dialog", "npc", null, "name", q.getTitle(), "lines", List.of(offer),
+                            "offers", List.of()));
+                }
+            }
+        }
+        return intros;
+    }
+
+    private void start(OnlinePlayer p, Quest q) {
+        CharacterQuest cq = p.quests.get(q.getCode());
         if (cq == null) {
-            cq = new CharacterQuest(p.characterId, questCode);
-            p.quests.put(questCode, cq);
+            cq = new CharacterQuest(p.characterId, q.getCode());
+            p.quests.put(q.getCode(), cq);
         } else {
             cq.restart();
         }
@@ -103,7 +128,6 @@ public class QuestEngine {
         List<String> lines = settle(p, q, cq);
         lines.forEach(l -> notifier.system(p, l));
         characters.saveQuest(cq);
-        afterQuestChange(p);
     }
 
     // --------------------------------------------------------------- zdarzenia
@@ -116,7 +140,7 @@ public class QuestEngine {
         checkAuto(p, QuestStepType.COLLECT);
     }
 
-    /** Hook pod przyszly system walki. */
+    /** Wywolywane przez system walki po pokonaniu potwora. */
     public void onKill(OnlinePlayer p, String monsterCode) {
         boolean changed = false;
         for (CharacterQuest cq : p.activeQuests()) {
@@ -125,8 +149,13 @@ public class QuestEngine {
             if (step != null && step.type() == QuestStepType.KILL && monsterCode.equals(step.target())) {
                 cq.setProgress(cq.getProgress() + 1);
                 if (cq.getProgress() >= step.countOrOne()) {
-                    cq.advance();
-                    settle(p, q, cq).forEach(l -> notifier.system(p, l));
+                    List<String> lines = new ArrayList<>();
+                    completeStep(p, q, cq, step, lines);
+                    lines.addAll(settle(p, q, cq));
+                    lines.forEach(l -> notifier.system(p, l));
+                } else {
+                    String name = content.monster(monsterCode).map(m -> m.getName()).orElse(monsterCode);
+                    notifier.system(p, q.getTitle() + ": " + name + " " + cq.getProgress() + "/" + step.countOrOne());
                 }
                 characters.saveQuest(cq);
                 changed = true;
@@ -182,9 +211,26 @@ public class QuestEngine {
             if (step.text() != null && !step.text().isBlank()) {
                 lines.add("Zaliczono: " + step.text());
             }
-            cq.advance();
+            completeStep(p, q, cq, step, lines);
         }
         return lines;
+    }
+
+    /** Konczy biezacy krok: wreczenie przedmiotow kroku i przejscie dalej. */
+    private void completeStep(OnlinePlayer p, Quest q, CharacterQuest cq, QuestStep step, List<String> lines) {
+        boolean gotItems = false;
+        for (ItemStack s : step.giveOrEmpty()) {
+            var tpl = content.item(s.code());
+            if (tpl.isPresent()) {
+                characters.grantItem(p.characterId, s.code(), Math.max(1, s.quantity()));
+                notifier.system(p, "Otrzymano: " + tpl.get().getName() + (s.quantity() > 1 ? " x" + s.quantity() : ""));
+                gotItems = true;
+            }
+        }
+        if (gotItems) {
+            progression.sendInventory(p);
+        }
+        cq.advance();
     }
 
     private boolean isSatisfied(OnlinePlayer p, QuestStep step) {
@@ -231,11 +277,37 @@ public class QuestEngine {
         return cq.getStepIndex() < q.getSteps().size() ? q.getSteps().get(cq.getStepIndex()) : null;
     }
 
+    // ------------------------------------------------------- widocznosc NPC
+
+    boolean isVisible(OnlinePlayer p, Npc npc) {
+        var v = npc.getVisibility();
+        if (v == null) {
+            return true;
+        }
+        CharacterQuest cq = p.quests.get(v.quest());
+        return cq != null && cq.getStatus() == QuestStatus.ACTIVE && v.matches(cq.getStepIndex());
+    }
+
+    List<Npc> visibleNpcs(OnlinePlayer p, String mapCode) {
+        return content.npcsOn(mapCode).stream().filter(n -> isVisible(p, n)).toList();
+    }
+
+    static Map<String, Object> npcView(Npc n) {
+        Map<String, Object> m = Msg.of("npc", "code", n.getCode(), "name", n.getName(), "x", n.getX(), "y", n.getY(),
+                "dir", n.getDir(), "app", n.getAppearance());
+        var v = n.getVisibility();
+        if (v != null && v.fleeX() != null && v.fleeY() != null) {
+            m.put("flee", Map.of("x", v.fleeX(), "y", v.fleeY()));
+        }
+        return m;
+    }
+
     // ---------------------------------------------------------------- payloady
 
     void afterQuestChange(OnlinePlayer p) {
         notifier.send(p, Msg.of("quests", "quests", questLog(p)));
-        notifier.send(p, Msg.of("npcMarks", "marks", markers(p)));
+        notifier.send(p, Msg.of("npcs", "npcs", visibleNpcs(p, p.mapCode).stream().map(QuestEngine::npcView).toList(),
+                "marks", markers(p)));
     }
 
     List<Map<String, Object>> questLog(OnlinePlayer p) {
@@ -273,7 +345,7 @@ public class QuestEngine {
     /** '!' - NPC ma misje dla gracza, '?' - NPC jest celem aktualnego kroku. */
     Map<String, String> markers(OnlinePlayer p) {
         Map<String, String> marks = new LinkedHashMap<>();
-        for (Npc npc : content.npcsOn(p.mapCode)) {
+        for (Npc npc : visibleNpcs(p, p.mapCode)) {
             boolean talkTarget = p.activeQuests().stream().anyMatch(cq -> {
                 QuestStep s = current(content.quest(cq.getQuestCode()).orElse(null), cq);
                 return s != null && s.type() == QuestStepType.TALK && npc.getCode().equals(s.target());

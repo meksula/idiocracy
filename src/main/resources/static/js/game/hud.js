@@ -122,39 +122,86 @@ export class Hud {
   }
 
   // ----------------------------------------------------------- dialog
+  /**
+   * Linie dialogu: "* tekst" - narracja, "> tekst" - kwestia gracza,
+   * "Imię: tekst" - kwestia postaci, inne - mowi rozmowca. Wiele linii w jednym
+   * wpisie rozdzielamy znakiem nowej linii. Dluzsze rozmowy odslaniaja sie krok po kroku.
+   */
   openDialog(msg) {
-    const npc = this.game.map.npcs.find(n => n.code === msg.npc);
+    const npc = msg.npc && this.game.map.npcs.find(n => n.code === msg.npc);
     const box = this.dialogBox;
     box.innerHTML = '';
-    const portrait = el('canvas', { class: 'pixel', width: 64, height: 64 });
-    if (npc) portrait.getContext('2d').drawImage(characterCanvas(npc.app, 'S', 0, 4), 0, 0);
+    const lines = msg.lines.flatMap(l => String(l).split('\n')).map(l => l.trim()).filter(Boolean);
+    const head = el('div', { class: 'd-head' });
+    if (npc) {
+      const portrait = el('canvas', { class: 'pixel', width: 64, height: 64 });
+      portrait.getContext('2d').drawImage(characterCanvas(npc.app, 'S', 0, 4), 0, 0);
+      head.append(portrait);
+    }
+    head.append(el('div', { class: 'd-name', text: msg.name }));
     const body = el('div', { class: 'd-body' });
-    const showMain = () => {
-      body.innerHTML = '';
-      for (const l of msg.lines) body.append(el('p', { text: l }));
-      const opts = el('div', { class: 'd-opts' });
-      for (const o of msg.offers) {
-        opts.append(el('button', { class: 'neon', onclick: () => showOffer(o) }, `▶ Misja: ${o.title}`));
-      }
-      opts.append(el('button', { class: 'secondary', onclick: () => this.closeDialog() }, 'Do widzenia [Esc]'));
-      body.append(opts);
+    const opts = el('div', { class: 'd-opts' });
+    box.append(head, body, opts);
+    box.classList.toggle('narrator', !npc);
+
+    const STEP = 2;
+    let shown = 0;
+    const renderLine = (l) => {
+      if (l.startsWith('* ')) return el('p', { class: 'narration', text: l.slice(2) });
+      if (l.startsWith('> ')) return el('p', { class: 'me-line', text: `— ${l.slice(2)}` });
+      const m = l.match(/^([^:*>]{2,40}):\s(.+)$/);
+      if (m) return el('p', { class: 'npc-line' }, el('span', { class: 'speaker', text: `${m[1]}: ` }), m[2]);
+      return el('p', { class: 'npc-line', text: l });
     };
     const showOffer = (o) => {
       body.innerHTML = '';
-      body.append(el('p', { class: 'amber', text: o.title }), el('p', { text: o.offer }));
-      body.append(el('div', { class: 'd-opts' },
+      opts.innerHTML = '';
+      body.append(el('p', { class: 'amber', text: o.title }));
+      String(o.offer).split('\n').filter(Boolean).forEach(l => body.append(renderLine(l.trim())));
+      opts.append(
         el('button', { onclick: () => { this.game.send({ t: 'accept', quest: o.quest, npc: msg.npc }); this.closeDialog(); } }, 'Przyjmuję'),
-        el('button', { class: 'secondary', onclick: showMain }, 'Nie teraz')));
+        el('button', { class: 'secondary', onclick: () => { shown = 0; reveal(); } }, 'Nie teraz'));
     };
-    box.append(el('div', { class: 'd-head' }, portrait, el('div', { class: 'd-name', text: msg.name })), body);
-    showMain();
+    const reveal = () => {
+      if (shown === 0) body.innerHTML = '';
+      const next = Math.min(lines.length, shown + STEP);
+      for (let i = shown; i < next; i++) body.append(renderLine(lines[i]));
+      shown = next;
+      body.scrollTop = body.scrollHeight;
+      opts.innerHTML = '';
+      if (shown < lines.length) {
+        opts.append(el('button', { class: 'neon', onclick: reveal }, 'Dalej ▸ [Spacja]'));
+        return;
+      }
+      for (const o of msg.offers) opts.append(el('button', { class: 'neon', onclick: () => showOffer(o) }, `▶ Misja: ${o.title}`));
+      opts.append(el('button', { class: 'secondary', onclick: () => this.closeDialog() }, npc ? 'Do widzenia [Esc]' : 'Zamknij [Esc]'));
+    };
+    this.advance = () => { if (shown < lines.length) reveal(); else if (!msg.offers.length) this.closeDialog(); };
+    reveal();
     box.classList.remove('hidden');
     this.dialogNpc = msg.npc;
   }
 
+  advanceDialog() { this.advance?.(); }
+
   closeDialog() {
+    const wasOpen = this.dialogOpen;
     this.dialogBox.classList.add('hidden');
     this.dialogNpc = null;
+    if (wasOpen) this.onDialogClosed?.();
+  }
+
+  // ------------------------------------------------------------- cel
+  renderTarget() {
+    const box = this.$('target-frame');
+    const mo = this.game.target && this.game.monsters.get(this.game.target);
+    if (!mo) { box.classList.add('hidden'); return; }
+    box.classList.remove('hidden');
+    const f = Math.max(0, Math.min(1, mo.hp / Math.max(1, mo.maxHp)));
+    box.innerHTML = '';
+    box.append(el('div', { class: 't-name', text: `${mo.name} [${mo.level}]` }),
+      el('div', { class: 'bar' }, el('div', { class: 'fill', style: { width: `${f * 100}%`, background: 'linear-gradient(#ff5a4a,#b8323a)' } }),
+        el('div', { class: 'label', text: `${mo.hp} / ${mo.maxHp}` })));
   }
 
   get dialogOpen() { return !this.dialogBox.classList.contains('hidden'); }

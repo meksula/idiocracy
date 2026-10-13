@@ -1,0 +1,1239 @@
+[
+ {
+  "code": "asphalt",
+  "name": "Asfalt",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "2222122222221222",
+     "2212222222222221",
+     "2121222222122232",
+     "2222122212212222",
+     "2223213222312121",
+     "2122213221222222",
+     "2212221222122322",
+     "2222321322122222",
+     "2222212222222222",
+     "2312212222222223",
+     "2222211322222222",
+     "2232122222232221",
+     "2222222222222122",
+     "2222212222211212",
+     "2223221222222232",
+     "2222222222222222"
+    ]
+   ]
+  },
+  "sortOrder": 0
+ },
+ {
+  "code": "asphalt-line",
+  "name": "Asfalt z pasem",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "2222322222221322",
+     "2223211222222122",
+     "2222232232222212",
+     "2222122223222331",
+     "2222222122222222",
+     "2322222222221222",
+     "2222322222222322",
+     "3554555225555552",
+     "2444444224443442",
+     "2223222212221221",
+     "1222221221222212",
+     "2211322212222322",
+     "1222221233221232",
+     "2222122323321222",
+     "2222223212113223",
+     "1231122222222322"
+    ]
+   ]
+  },
+  "sortOrder": 1
+ },
+ {
+  "code": "asphalt-line-v",
+  "name": "Asfalt z pasem (pion)",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "1122232222222122",
+     "2122222542222222",
+     "2222212542222222",
+     "2223221542322121",
+     "2222222542322322",
+     "1232222543222222",
+     "2222221541211232",
+     "2223222222222222",
+     "2232323223222222",
+     "2222312542222222",
+     "2232223542222221",
+     "2122222542221213",
+     "2232322542322212",
+     "2232322542222232",
+     "2222222542222221",
+     "1222122222231332"
+    ]
+   ]
+  },
+  "sortOrder": 2
+ },
+ {
+  "code": "concrete",
+  "name": "Beton",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "3434444444454443",
+     "4444444444433443",
+     "4444444444444443",
+     "4444444444444443",
+     "4444434544443443",
+     "4444454344444443",
+     "3344444444444433",
+     "4544444444444443",
+     "4444434444444443",
+     "4444445444344543",
+     "3444444544444443",
+     "4434344344444443",
+     "4444444444444443",
+     "4444445444444443",
+     "4444444455444433",
+     "3333333333333333"
+    ]
+   ]
+  },
+  "sortOrder": 3
+ },
+ {
+  "code": "concrete-cracked",
+  "name": "Beton popękany",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "4443444444544443",
+     "4424444334444543",
+     "4442444444444443",
+     "4454244444444443",
+     "4455424444344443",
+     "4444424444444443",
+     "4444442454544453",
+     "4445444224444443",
+     "44444442G2224333",
+     "444444424444g243",
+     "4444445244444443",
+     "4434442434434433",
+     "4444442444444453",
+     "444444G444444343",
+     "4444442433444443",
+     "3333333333333333"
+    ]
+   ]
+  },
+  "sortOrder": 4
+ },
+ {
+  "code": "dirt",
+  "name": "Ziemia",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "BBkBBBBBbBBBbBBB",
+     "BBBBBbBbBBkkBBBB",
+     "BBBBBbBBbBBBBBBb",
+     "BBBbBBBBBkBBBBBB",
+     "BbbbbBBbBBBBBBbB",
+     "BbBBBBBbBBbkBbBB",
+     "BBBBBBkBBBBBBBkb",
+     "BkBbBBBBBBBkBBBB",
+     "BBBBBbBbBBkkkBkb",
+     "BBBBBBBBBBBkBBBB",
+     "kBBBBBBBbBkBBBbk",
+     "BBBBBBBBBBBBBBBB",
+     "BBBBBBBbbBBBBbBB",
+     "BBBBbBBBbBbBBBkB",
+     "BBbBBBbBBkkBkBBB",
+     "BBBBBBkbbBBBBBBB"
+    ]
+   ]
+  },
+  "sortOrder": 5
+ },
+ {
+  "code": "grass-dead",
+  "name": "Zeschnięta trawa",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "gGggGggggggggggG",
+     "gggGgGGGggbgggGg",
+     "ggggggggggggkggg",
+     "gggggGggGgGgbggb",
+     "ggGggbgbgggGGggg",
+     "kgggggggGGgggggg",
+     "gGgggGgkbGGgkgbg",
+     "gggggggGGgkggGGg",
+     "bGgggGggGbGbgggg",
+     "gGgkbgkggGGggGgg",
+     "GggGgGGggggbggkG",
+     "GkgbgGGggggGggkg",
+     "kgggggggggkgGbgg",
+     "ggkggggGkgGgggGg",
+     "gggggGggggGggGgk",
+     "gGggggggggGgGgGg"
+    ]
+   ]
+  },
+  "sortOrder": 6
+ },
+ {
+  "code": "sand",
+  "name": "Piach",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "kkkkkkkkkkkkkkOk",
+     "kkk5OkkkkkkkkkkB",
+     "kkkkkkkBkBkkkkkk",
+     "kBkkkkkkkkkkOkkB",
+     "kkkkkkkkkBkBkOkk",
+     "kkkkBkkkkkkkkBkk",
+     "kkkkkkOkkkkkkkBk",
+     "kkkkkkkkkkkB5Okk",
+     "kBkkkkBkkBkkOkkk",
+     "kkkkkBkkkkkkkkkk",
+     "kkBkkkBkkkkkkkBk",
+     "kkkkkkkkkkBkkBkk",
+     "kkBkkkkkkkkkkBkk",
+     "kkkkkkkB5k5kkkkk",
+     "5kkkkkkkkkkkBOkk",
+     "kkkkkBkkkkkkkkkk"
+    ]
+   ]
+  },
+  "sortOrder": 7
+ },
+ {
+  "code": "rubble-ground",
+  "name": "Gruz",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "BB3BBB4BBBB3bB2B",
+     "BB3BB3BB4BBBbB32",
+     "BB323B4bbB4BB32B",
+     "BBB3BBB2BBB2B43B",
+     "BB3BB344BBBBB44B",
+     "BBBB3BBBbb3BB3B3",
+     "BBBBBBB3BBBbb332",
+     "BB2BBBBbB344bbBB",
+     "bB3b3BBBB43BBB2b",
+     "BBBBBbBB3BB334BB",
+     "BBb34bBb43b4BbbB",
+     "bBB32BBb4344B2bB",
+     "BBbBBBB3bBbB4BB2",
+     "4BB24BB3BbB2B3BB",
+     "BBBBB4B3BB44BB3B",
+     "34BBB4B23BBB3BBB"
+    ]
+   ]
+  },
+  "sortOrder": 8
+ },
+ {
+  "code": "floor-tiles",
+  "name": "Płytki",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "5k55444455k54444",
+     "5555444355554444",
+     "5555444455554434",
+     "5555444455554444",
+     "4434555544445555",
+     "4444555544445555",
+     "4444355544445555",
+     "44445555k44455k5",
+     "5555444455554444",
+     "5555444455554344",
+     "5555443455554444",
+     "5555444455k54444",
+     "44k4555544445555",
+     "4444555544445555",
+     "4444555544445555",
+     "4444555544445555"
+    ]
+   ]
+  },
+  "sortOrder": 9
+ },
+ {
+  "code": "wood-floor",
+  "name": "Deski",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "BBBBBBBBBBkBBBBB",
+     "bBBBBBBBBBBBBBBB",
+     "BBBBBBBBbBBBBBBB",
+     "bbbbbkbbbbbbbbbb",
+     "BBBBBBBBBBBBBBBB",
+     "BBBBbBBBBBBBBBBB",
+     "BBBBBBBBBBBBbBBk",
+     "bbbbkbbbbbbbbbbb",
+     "kBBBBkBBkBBBBBBB",
+     "BBBBBkBBbBBBBkBB",
+     "bBBBBBBBBBBBBBBB",
+     "bbbbbbbbbbbbbbbb",
+     "BBBBkBBBBBBBBBBB",
+     "BBBBBBBBBBBBbBBB",
+     "BBBBbBBBBBBBBBBB",
+     "bbbbbbbbbbbbbbbk"
+    ]
+   ]
+  },
+  "sortOrder": 10
+ },
+ {
+  "code": "metal-floor",
+  "name": "Blacha",
+  "layer": "GROUND",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "4444444244444442",
+     "4333333243333332",
+     "4313333243133332",
+     "4333333243333332",
+     "4333333243333332",
+     "4333313243333132",
+     "4333333243333332",
+     "2222222222222222",
+     "4444444244444442",
+     "4333333243333332",
+     "4313333243133332",
+     "4333333243333332",
+     "4333333243333332",
+     "4333313243333132",
+     "4333333243333332",
+     "2222222222222222"
+    ]
+   ]
+  },
+  "sortOrder": 11
+ },
+ {
+  "code": "toxic-water",
+  "name": "Toksyczna woda",
+  "layer": "GROUND",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "gGggggGgGggggGgg",
+     "gggggGgGgggggggg",
+     "lllgGgglllggGgll",
+     "ggggGgGggggGgGgg",
+     "ggggggggggggGggg",
+     "GgGggGggGggGggGg",
+     "gggggggggggggggg",
+     "ggGlllgGgglllggg",
+     "Gggggggggggggggg",
+     "gggggyggggGgggGg",
+     "gggggggggggggggg",
+     "gggggGgggggggggg",
+     "lllgggglllGgggll",
+     "gggggggggggggggg",
+     "ggggggggggGgggGg",
+     "gggggggggggggggg"
+    ],
+    [
+     "gGGggggggggGgGgG",
+     "ggggggGggGgggGgg",
+     "ggGggggGggggggGg",
+     "gggGglllgggglllg",
+     "gggGggggggGggggg",
+     "ggGgggggggggGggg",
+     "gGggGggGgggggggG",
+     "ggggggggggggGgGg",
+     "gglllgggglllggGg",
+     "gggggggggggygggg",
+     "gggggggGgggggggg",
+     "ggggggGggggggggg",
+     "ggggggggGggggggg",
+     "ggggglllgggglllg",
+     "gggggggggggggggg",
+     "ggGgggggggGgggGG"
+    ]
+   ]
+  },
+  "sortOrder": 12
+ },
+ {
+  "code": "water",
+  "name": "Woda",
+  "layer": "GROUND",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "uuuucuuuuuuuuuuu",
+     "uuuuuucuuuuuuuuu",
+     "uuuuuucuuuuuucuu",
+     "UUUuuuUUUuuuUUUu",
+     "ucucucuuuuuuuuuu",
+     "uucuuuuuuuuucuuu",
+     "ucuuuuuuuuuuuuuu",
+     "uuuuuccuuuuuuuuu",
+     "uucuUUUucuUUUuuu",
+     "uuuuuuuuuuuuucuc",
+     "uuuuuuuuuuuuuuuu",
+     "uuuuuucuuuuuuuuu",
+     "uuuuuuuuuuuuuuuu",
+     "ucUUUuuuUUUucuUU",
+     "uuuuuuuuuucuuuuu",
+     "uuuuuuuuuuuuuuuu"
+    ],
+    [
+     "uuuuuuuuuuuuuuuu",
+     "ucuuuuuuuuucuuuu",
+     "uuuuuuuuuuuuuuuc",
+     "cuuuucuuuucuuuuu",
+     "uuuuuUUUuuuUUUuu",
+     "ucuuuuuucuuuuuuu",
+     "uucuuuuucuuuuuuc",
+     "uuuuuuuuuuuuuuuu",
+     "uuuuuuuuuuuuuuuu",
+     "uuuUUUuuuUUUuuuU",
+     "uuuuuuuucuuuuuuu",
+     "uuucuuuuuuuuuuuu",
+     "uuuuucuuuuuucuuu",
+     "uuuuuuucuuuuuuuc",
+     "uUUUuuuUUUuuuUUU",
+     "uuuuuuuuuuuuuuuu"
+    ]
+   ]
+  },
+  "sortOrder": 13
+ },
+ {
+  "code": "wall-brick",
+  "name": "Mur ceglany",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "33r333r333333333",
+     "3ooooooo3ooooooo",
+     "3RRRRRRR3RRRRRRR",
+     "3rrrrrrr3rrrrrrr",
+     "3333333333333333",
+     "oooo3ooooooo3ooo",
+     "RRrR3RRRRRRRrRRR",
+     "rrrr3rrrrrrr3rrr",
+     "3333r33333333333",
+     "3ooorooo3ooooooo",
+     "3RRrRrRrrRRRRRRr",
+     "3rrrrrrr3rrrrrrr",
+     "33r3333333333333",
+     "oooo3ooooooo3ooo",
+     "RRRR3RRRRRRR3RRR",
+     "rrrr3rrrrrrr3rrr"
+    ]
+   ]
+  },
+  "sortOrder": 100
+ },
+ {
+  "code": "wall-concrete",
+  "name": "Ściana z wielkiej płyty",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "4444444444444441",
+     "4423333334333331",
+     "4332333333133331",
+     "4323233333313331",
+     "4332334333312331",
+     "4333343333331331",
+     "4333333333341431",
+     "2222222222222222",
+     "4444444444444444",
+     "4333333333233331",
+     "4333333333333331",
+     "4333333333323331",
+     "4333343323333431",
+     "4433333333333431",
+     "4333333333343221",
+     "1111111111111111"
+    ]
+   ]
+  },
+  "sortOrder": 101
+ },
+ {
+  "code": "wall-ruin",
+  "name": "Ruina ściany",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "0000000.........",
+     "44444440.0000...",
+     "23343330023320..",
+     "3333333003333000",
+     "4444444444444444",
+     "3323334333233343",
+     "3333333332333333",
+     "43RRR33343333433",
+     "33RRR33333RRR334",
+     "33RRR33333RRR343",
+     "4233334333RRR333",
+     "3332333234332333",
+     "3323333343443333",
+     "3333343342422343"
+    ]
+   ]
+  },
+  "sortOrder": 102
+ },
+ {
+  "code": "fence",
+  "name": "Siatka",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "53.............5",
+     "5355555555555555",
+     "53.43..43..43..5",
+     "534..34..34..345",
+     "533..43..43..435",
+     "53.34..34..34..5",
+     "53.43..43..43..5",
+     "534..34..34..345",
+     "533..43..43..435",
+     "53.34..34..34..5",
+     "53.43..43..43..5",
+     "534..34..34..345",
+     "533..43..43..435",
+     "53.34..34..34..5"
+    ]
+   ]
+  },
+  "sortOrder": 103
+ },
+ {
+  "code": "tree-dead",
+  "name": "Martwe drzewo",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     ".....0....0.....",
+     "....0b0..0B0.0..",
+     "..0.0b0..0B00B0.",
+     ".0B00b0..0B0bbb0",
+     ".00bb0...0BB000.",
+     "0bb0b0.000B0....",
+     ".00.0B0kBB0.....",
+     ".....0BkB0......",
+     "......0BB0......",
+     "......0kB0......",
+     "......0kB0......",
+     "......0kB0......",
+     "......0kB0......",
+     "......0kB0......",
+     ".....00kB00.....",
+     "....0bbbbbb0...."
+    ]
+   ]
+  },
+  "sortOrder": 104
+ },
+ {
+  "code": "bush-mutant",
+  "name": "Zmutowany krzak",
+  "layer": "OBJECT",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "........0.......",
+     "....0000G0000...",
+     "...0GGlGGGGGG0..",
+     "..0GlllllGmGGG0.",
+     "..0lllllllGgGG0.",
+     ".0GGlllllGgggGG0",
+     "..0GmGlGGggggg0.",
+     "..0GGGGmGGggPG0.",
+     "...0GGGGGGGgG0..",
+     "....0000G0000...",
+     "........0......."
+    ]
+   ]
+  },
+  "sortOrder": 105
+ },
+ {
+  "code": "grass-tuft",
+  "name": "Kępka trawy",
+  "layer": "OBJECT",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "..........l.....",
+     "......l...G.....",
+     "......G.l.G.....",
+     "....l.G.G.G.l...",
+     "....G.G.G.G.G...",
+     "....G.G.G.G.G...",
+     "....G.G.G.G.G...",
+     "...ggggggggggg..",
+     "................",
+     "................"
+    ]
+   ]
+  },
+  "sortOrder": 106
+ },
+ {
+  "code": "crate",
+  "name": "Skrzynia",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "..000000000000..",
+     ".0kkkkkkkkkkkb0.",
+     ".0kbBBBBBBBBbb0.",
+     ".0kBbBBBBBBbBb0.",
+     ".0kBBbBBBBbBBb0.",
+     ".0kBBBbBBbBBBb0.",
+     ".0kkkkkkkkkkkk0.",
+     ".0kBBBBbbBBBBb0.",
+     ".0kBBBbBBbBBBb0.",
+     ".0kBBbBBBBbBBb0.",
+     ".0kBbBBBBBBbBb0.",
+     ".0kbBBBBBBBBbb0.",
+     ".0bbbbbbbbbbbb0.",
+     "..000000000000.."
+    ]
+   ]
+  },
+  "sortOrder": 107
+ },
+ {
+  "code": "barrel-toxic",
+  "name": "Beczka z odpadami",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     ".......000......",
+     "....000ooo000...",
+     "...0ooolloooo0..",
+     "...0oRRoooRr0...",
+     "...0oRRRRRRr0...",
+     "...0rrrrrrrr0...",
+     "...0oRRRlRRr0...",
+     "...0oRRllRRr0...",
+     "...0oRRllRRr0...",
+     "...0oRRRRRRr0...",
+     "...0rrrrrrrr0...",
+     "...0oRRRRRRr0...",
+     "...0oRRRRRRr0...",
+     "...0oRRRRRRr0...",
+     "...1000000001..."
+    ]
+   ]
+  },
+  "sortOrder": 108
+ },
+ {
+  "code": "car-wreck",
+  "name": "Wrak auta",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     ".00000000000000.",
+     "0ooooooooooBoor0",
+     "0oRRCCCCCCCCRRr0",
+     "0yRRcBccBcccRRx0",
+     "0oRRcBcccccBRBr0",
+     "0oRBRRBRRRRRRRr0",
+     "0BRRrrrrrrrrRRr0",
+     "0oRRrrrrrrrrRRr0",
+     "0oRRRRRRRRRRRRr0",
+     "0r000rrrrrr000r0",
+     ".00200000000200.",
+     "..000......000..",
+     "................"
+    ]
+   ]
+  },
+  "sortOrder": 109
+ },
+ {
+  "code": "tires",
+  "name": "Sterta opon",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "........0.......",
+     ".....0001000....",
+     "....012101110...",
+     "...01100000110..",
+     "....011101110...",
+     "....000111000...",
+     "...01211011110..",
+     "..0111000001110.",
+     "...01111011110..",
+     "...00001110000..",
+     "..0121100011110.",
+     ".011100000001110",
+     "..0111100011110.",
+     "...00001110000..",
+     ".......000......"
+    ]
+   ]
+  },
+  "sortOrder": 110
+ },
+ {
+  "code": "lamp-post",
+  "name": "Latarnia (bez prądu)",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     ".......000000...",
+     "......03335550..",
+     "......03205y50..",
+     "......0320000...",
+     "......0320......",
+     "......0320......",
+     "......0320......",
+     "......0320......",
+     "......0320......",
+     "......0320......",
+     "......0320......",
+     "......0320......",
+     "......0320......",
+     ".....003200.....",
+     "....02222220...."
+    ]
+   ]
+  },
+  "sortOrder": 111
+ },
+ {
+  "code": "terminal-dead",
+  "name": "Martwy terminal AI",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "...0000000000...",
+     "..033333333310..",
+     "..031111111110..",
+     "..031cccccc110..",
+     "..031cccccc110..",
+     "..031cccccc110..",
+     "..031ccccXc110..",
+     "..031111111110..",
+     "..032222222210..",
+     "..032333333210..",
+     "..032222222210..",
+     "..032333333210..",
+     "..032222222210..",
+     "..032212222210..",
+     "..011111111110..",
+     "..100000000001.."
+    ],
+    [
+     "...0000000000...",
+     "..033333333310..",
+     "..031111111110..",
+     "..031cccccc110..",
+     "..031CCCCcc110..",
+     "..031cccccc110..",
+     "..031ccccxc110..",
+     "..031111111110..",
+     "..032222222210..",
+     "..032333333210..",
+     "..032222222210..",
+     "..032333333210..",
+     "..032222222210..",
+     "..0322x2222210..",
+     "..011111111110..",
+     "..100000000001.."
+    ]
+   ]
+  },
+  "sortOrder": 112
+ },
+ {
+  "code": "server-rack",
+  "name": "Szafa serwerowa",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "..033333333310..",
+     "..032222222210..",
+     "..031111111110..",
+     "..032x2122C210..",
+     "..032222222210..",
+     "..031111111110..",
+     "..032x2122C210..",
+     "..032222222210..",
+     "..031111111110..",
+     "..032x2122C210..",
+     "..032222222210..",
+     "..031111111110..",
+     "..032x2122C210..",
+     "..032222222210..",
+     "..011111111110..",
+     "...0000000000..."
+    ]
+   ]
+  },
+  "sortOrder": 113
+ },
+ {
+  "code": "bookshelf",
+  "name": "Regał z książkami",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "0BBBBBBBBBBBBBr0",
+     "0BPUbbbxUbbObbr0",
+     "0BPUUGGxUxGORGr0",
+     "0BPUUGGxUxGORGr0",
+     "0BPUUGGxUxGORGr0",
+     "0BBBBBBBBBBBBBr0",
+     "0BbUGRb6UUbbxxr0",
+     "0BPUGRO6UUUUxxr0",
+     "0BPUGRO6UUUUxxr0",
+     "0BPUGRO6UUUUxxr0",
+     "0BBBBBBBBBBBBBr0",
+     "0BbbbbObGPbbbbr0",
+     "0BOOROOxGPPP6Pr0",
+     "0BOOROOxGPPP6Pr0",
+     "0rOOROOxGPPP6Pr0",
+     ".0BBBBBBBBBBBB0."
+    ]
+   ]
+  },
+  "sortOrder": 114
+ },
+ {
+  "code": "rubble",
+  "name": "Kupa gruzu",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     ".......0........",
+     ".....00R0.......",
+     "....0RR0........",
+     "...0R04000......",
+     "..0R4R2244000...",
+     "..0444444434300.",
+     ".044444454444430",
+     ".024244544444440",
+     "0334455444245423",
+     ".02333R332343330",
+     ".025333533332330",
+     "..005R335233300.",
+     "....000030000..."
+    ]
+   ]
+  },
+  "sortOrder": 115
+ },
+ {
+  "code": "campfire",
+  "name": "Ognisko",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     ".........0......",
+     "........0x0.....",
+     ".......0o0......",
+     "......00o00.....",
+     ".....0ooooo0....",
+     ".....0ooooo0....",
+     ".....0ooOoo0....",
+     "....0ooOyOoo0...",
+     "...000OOOOO00...",
+     "..0bb0oOOOoBB0..",
+     "...00booOoo000..",
+     "..033BBBobb3330.",
+     "..0BB033333bb0..",
+     "...00.0000000..."
+    ],
+    [
+     "................",
+     "................",
+     "..........0.....",
+     ".......000x0....",
+     "......0oo00.....",
+     ".....0ooooo0....",
+     ".....0ooooo0....",
+     ".....0ooOoo0....",
+     "....0ooOyOoo0...",
+     ".....0OOOOO0....",
+     "...000oOOOo00...",
+     "..0bb0ooOooBB0..",
+     "...00bbboBB000..",
+     "..033BBBbbb3330.",
+     "..0BB033333bb0..",
+     "...00.0000000..."
+    ]
+   ]
+  },
+  "sortOrder": 116
+ },
+ {
+  "code": "sign-board",
+  "name": "Tablica",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     ".00000000000000.",
+     "0kkkkkkkkkkkkkb0",
+     "0kBBBBBBBBBBBBb0",
+     "0kB0000000BBBBb0",
+     "0kBBBBBBBBBBBBb0",
+     "0kB000000000BBb0",
+     "0kBBBBBBBBBBBBb0",
+     "0kB00000BBBBBBb0",
+     "0bbbbbbbbbbbbbb0",
+     ".000b000000b000.",
+     "...0b0....0b0...",
+     "...0b0....0b0...",
+     "...0b0....0b0...",
+     "...0b0....0b0...",
+     "....0......0...."
+    ]
+   ]
+  },
+  "sortOrder": 117
+ },
+ {
+  "code": "neon-sign",
+  "name": "Neon (zgasły)",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     ".0000000000000..",
+     "022222222222220.",
+     "021111111111110.",
+     "021ppp11ppp1p10.",
+     "021p1111p1p1p10.",
+     "021ppp11p1p1p10.",
+     "021p1111p1p1p10.",
+     "021ppp11p1p1p10.",
+     "021111111111110.",
+     ".00000000000000.",
+     "................",
+     "................",
+     "................",
+     "................"
+    ],
+    [
+     "................",
+     "................",
+     ".0000000000000..",
+     "022222222222220.",
+     "021111111111110.",
+     "021mmm11ppp1m10.",
+     "021m1111p1p1m10.",
+     "021mmm11p1p1m10.",
+     "021m1111p1p1m10.",
+     "021mmm11p1p1m10.",
+     "021111111111110.",
+     ".00000000000000.",
+     "................",
+     "................",
+     "................",
+     "................"
+    ]
+   ]
+  },
+  "sortOrder": 118
+ },
+ {
+  "code": "trash-bags",
+  "name": "Worki ze śmieciami",
+  "layer": "OBJECT",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "................",
+     "........00......",
+     "......00GG0.....",
+     ".....0242220....",
+     ".....0222220....",
+     "..00022222220...",
+     ".02442222223000.",
+     ".022222222453330",
+     "0222222223333330",
+     ".022222333333333",
+     ".022222233333330",
+     "..00020033333330",
+     ".....0..0003000."
+    ]
+   ]
+  },
+  "sortOrder": 119
+ },
+ {
+  "code": "bed",
+  "name": "Prycza",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "..000000000000..",
+     ".0bbbbbbbbbbbb0.",
+     ".0b6666666666b0.",
+     ".0b6666666666b0.",
+     ".0b6666666666b0.",
+     ".0bUUUUUUUUUub0.",
+     ".0bUUUUUUUUUub0.",
+     ".0bUUUUUUUUUub0.",
+     ".0bUUUUUUUUUub0.",
+     ".0bUUUUUUUUUub0.",
+     ".0bUUUUUUUUUub0.",
+     ".0bUUUUUUUUUub0.",
+     ".0buuuuuuuuuub0.",
+     ".0bbbbbbbbbbbb0.",
+     "..000000000000.."
+    ]
+   ]
+  },
+  "sortOrder": 120
+ },
+ {
+  "code": "table",
+  "name": "Stół",
+  "layer": "OBJECT",
+  "solid": true,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     ".00000000000000.",
+     "0kkkkkkkkkkkkkb0",
+     "0kBB666BBBBBBBb0",
+     "0kBB666BBBxBBBb0",
+     "0kBBBBBBBBBBBBb0",
+     "0kBBBBBBBBBBBBb0",
+     "0kBBBBBBBBBBBBb0",
+     "0bbbbbbbbbbbbbb0",
+     ".0b0000000000b0.",
+     ".0b0........0b0.",
+     ".0b0........0b0.",
+     ".0b0........0b0.",
+     "..0..........0.."
+    ]
+   ]
+  },
+  "sortOrder": 121
+ },
+ {
+  "code": "stairs-down",
+  "name": "Zejście / przejście",
+  "layer": "OBJECT",
+  "solid": false,
+  "sprite": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     ".00000000000000.",
+     "0222222222222220",
+     "0244444444444420",
+     "0244444444444420",
+     "0223333333333220",
+     "0223333333333220",
+     "0222444444442220",
+     "0222444444442220",
+     "0222233333322220",
+     "0222233333322220",
+     "0222224444222220",
+     "0222224444222220",
+     "0222222002222220",
+     "0222222002222220",
+     "0222222222222220",
+     ".00000000000000."
+    ]
+   ]
+  },
+  "sortOrder": 122
+ }
+]

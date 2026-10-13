@@ -1,0 +1,118 @@
+[
+  {
+    "code": "zlomiarz",
+    "name": "Złomiarz",
+    "description": "Wojownik postapokaliptycznego recyklingu. Walczy tym, co znajdzie — zwykle rurą. Wytrzymały i bezpośredni.",
+    "stats": {
+      "strength": 3,
+      "agility": 0,
+      "vitality": 2,
+      "intellect": 0
+    },
+    "appearance": {
+      "primary": "B",
+      "secondary": "2",
+      "feet": "b"
+    },
+    "startingItems": [
+      {
+        "code": "rura-stalowa",
+        "quantity": 1
+      },
+      {
+        "code": "konserwa",
+        "quantity": 2
+      }
+    ],
+    "playable": true,
+    "sortOrder": 1
+  },
+  {
+    "code": "technik",
+    "name": "Technik",
+    "description": "Potrafi naprawić maszynę bez pytania AI o instrukcję. W 2074 to prawie magia. Pułapki, gadżety, prąd z niczego.",
+    "stats": {
+      "strength": 1,
+      "agility": 1,
+      "vitality": 1,
+      "intellect": 2
+    },
+    "appearance": {
+      "primary": "O",
+      "secondary": "u",
+      "feet": "1"
+    },
+    "startingItems": [
+      {
+        "code": "klucz-francuski",
+        "quantity": 1
+      },
+      {
+        "code": "kamizelka-odblaskowa",
+        "quantity": 1
+      },
+      {
+        "code": "bateria",
+        "quantity": 1
+      }
+    ],
+    "playable": true,
+    "sortOrder": 2
+  },
+  {
+    "code": "bibliotekarz",
+    "name": "Bibliotekarz",
+    "description": "Strażnik papierowej wiedzy. Jego zaklęcia to fakty, a fakty w świecie bez AI rażą mocniej niż piorun.",
+    "stats": {
+      "strength": 0,
+      "agility": 0,
+      "vitality": 1,
+      "intellect": 4
+    },
+    "appearance": {
+      "primary": "p",
+      "secondary": "2",
+      "feet": "b"
+    },
+    "startingItems": [
+      {
+        "code": "okulary-zerowki",
+        "quantity": 1
+      },
+      {
+        "code": "woda-filtrowana",
+        "quantity": 2
+      }
+    ],
+    "playable": true,
+    "sortOrder": 3
+  },
+  {
+    "code": "kurier",
+    "name": "Kurier",
+    "description": "Bez GPS i map w telefonie jedyny, kto zna drogę. Szybki, zwinny, trafia z dystansu i zawsze dostarcza.",
+    "stats": {
+      "strength": 1,
+      "agility": 3,
+      "vitality": 1,
+      "intellect": 0
+    },
+    "appearance": {
+      "primary": "C",
+      "secondary": "1",
+      "feet": "6"
+    },
+    "startingItems": [
+      {
+        "code": "buty-robocze",
+        "quantity": 1
+      },
+      {
+        "code": "woda-filtrowana",
+        "quantity": 3
+      }
+    ],
+    "playable": true,
+    "sortOrder": 4
+  }
+]

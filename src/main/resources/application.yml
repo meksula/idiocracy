@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: offline-2074
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/offline2074}
+    username: ${DB_USER:game}
+    password: ${DB_PASSWORD:game}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+
+server:
+  port: ${PORT:8080}
+
+game:
+  title: "OFFLINE 2074"
+  jwt-secret: ${JWT_SECRET:dev-secret-change-me-dev-secret-change-me-0123456789}
+  jwt-ttl-hours: 168
+  # Pierwsze zarejestrowane konto zawsze dostaje role ADMIN (wygodne na POC).
+  admin-emails: ${ADMIN_EMAILS:}
+  first-account-admin: true
+  max-characters-per-account: 5
+  starting-ccoin: 25
+  start-map: osada
+  base-move-delay-ms: 260
+  save-interval-ms: 15000

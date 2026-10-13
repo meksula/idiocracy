@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OFFLINE 2074</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <style>
+    main { max-width: 980px; margin: 0 auto; padding: 48px 16px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: start; }
+    .lore p { font-size: 22px; color: var(--text); }
+    .lore p.dim { color: var(--muted); }
+    .lore .terminal { margin-top: 24px; border: 2px solid var(--line); padding: 12px 14px; background: #08090c; color: var(--toxic); font-size: 19px; }
+    .lore .terminal span { color: var(--red); }
+    .tabs { display: flex; gap: 0; margin-bottom: 14px; }
+    .tabs button { flex: 1; }
+    .tabs button.active { background: var(--teal); box-shadow: inset 2px 2px 0 var(--neon), inset -2px -2px 0 #0b2e37; }
+    form button[type=submit] { width: 100%; margin-top: 16px; }
+    .hint { font-size: 17px; color: var(--muted); margin-top: 10px; }
+    @media (max-width: 760px) { main { grid-template-columns: 1fr; padding-top: 24px; } }
+  </style>
+</head>
+<body>
+<main>
+  <section class="lore">
+    <div class="logo">OFFLINE 2074<small>ODBUDOWA MYŚLENIA</small></div>
+    <p><span class="no-signal">NO SIGNAL</span></p>
+    <p>Rok 2074. Wielka burza magnetyczna wyłączyła wszystkie sztuczne inteligencje na planecie. Jedyne źródło wiedzy, rad i decyzji zgasło w jedną noc.</p>
+    <p>Okazało się, że ludzkość od dawna nie myślała sama. Nikt nie pamięta, jak naprawić rurę, policzyć resztę ani znaleźć drogi do domu.</p>
+    <p class="dim">Działa tylko jedno: <span class="ccoin">c-coin</span> — waluta w chmurze, której nikt już nie rozumie, ale wszyscy przyjmują.</p>
+    <p>Zbierz resztki rozumu. Odbuduj cywilizację. Pomyśl.</p>
+    <div class="terminal">&gt; AI_CORE status: <span>OFFLINE</span><br>&gt; ostatnia odpowiedź: "Zapytaj kogoś mądrzejszego."<br>&gt; _</div>
+  </section>
+
+  <section class="panel rust">
+    <span class="panel-title">Terminal dostępu</span>
+    <div class="tabs">
+      <button type="button" class="secondary active" data-mode="login">Logowanie</button>
+      <button type="button" class="secondary" data-mode="register">Nowe konto</button>
+    </div>
+    <form id="auth">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="email" required>
+      <label for="password">Hasło</label>
+      <input id="password" type="password" autocomplete="current-password" minlength="6" required>
+      <div id="confirm-box" class="hidden">
+        <label for="password2">Powtórz hasło</label>
+        <input id="password2" type="password" autocomplete="new-password" minlength="6">
+      </div>
+      <button type="submit" id="submit">Wejdź</button>
+      <div class="error" id="error"></div>
+      <div class="hint">Wersja POC: konto aktywuje się od razu, bez maila z linkiem.</div>
+    </form>
+  </section>
+</main>
+<script type="module">
+  import { api, saveSession, session } from '/js/api.js';
+
+  if (session()?.token) location.href = '/characters.html';
+
+  let mode = 'login';
+  const $ = (id) => document.getElementById(id);
+  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+    mode = b.dataset.mode;
+    document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x === b));
+    $('confirm-box').classList.toggle('hidden', mode !== 'register');
+    $('submit').textContent = mode === 'register' ? 'Załóż konto' : 'Wejdź';
+    $('password').autocomplete = mode === 'register' ? 'new-password' : 'current-password';
+    $('error').textContent = '';
+  }));
+
+  $('auth').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $('error').textContent = '';
+    const email = $('email').value.trim(), password = $('password').value;
+    if (mode === 'register' && password !== $('password2').value) {
+      $('error').textContent = 'Hasła nie są takie same. Pomyśl jeszcze raz.';
+      return;
+    }
+    $('submit').disabled = true;
+    try {
+      const s = await api(`/api/auth/${mode}`, { method: 'POST', body: { email, password } });
+      saveSession(s);
+      location.href = '/characters.html';
+    } catch (err) {
+      $('error').textContent = err.message;
+    } finally {
+      $('submit').disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

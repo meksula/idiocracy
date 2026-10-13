@@ -1,0 +1,142 @@
+[
+  {
+    "code": "pierwsze-mysli",
+    "title": "Pierwsze myśli",
+    "description": "Sołtys Zenon chce sprawdzić, czy umiesz jeszcze samodzielnie myśleć.",
+    "giverNpc": "soltys-zenon",
+    "minLevel": 1,
+    "repeatable": false,
+    "sortOrder": 1,
+    "steps": [
+      {
+        "type": "TALK",
+        "target": "bibliotekarka-halina",
+        "text": "Porozmawiaj z Bibliotekarką Haliną w bibliotece (północny wschód).",
+        "dialog": "Zenon cię przysłał? Dobrze. Pierwsza lekcja: AI nie wróciło, bo AI nie było bogiem, tylko programem. Idź i popatrz na ten martwy terminal na placu. Uważnie."
+      },
+      {
+        "type": "VISIT",
+        "target": "osada",
+        "x": 20,
+        "y": 12,
+        "radius": 1,
+        "text": "Obejrzyj martwy terminal AI na placu."
+      },
+      {
+        "type": "TALK",
+        "target": "soltys-zenon",
+        "text": "Wróć do Sołtysa Zenona i powiedz mu, co zobaczyłeś.",
+        "dialog": "I co? Czerwona dioda i napis NO SIGNAL. Od pięciu lat. Ludzie nadal przychodzą i pytają go o pogodę. Ty pierwszy przyszedłeś i POMYŚLAŁEŚ. To już coś."
+      }
+    ],
+    "rewards": {
+      "ccoin": 30,
+      "xp": 120,
+      "items": [
+        {
+          "code": "bateria",
+          "quantity": 1
+        },
+        {
+          "code": "kurtka-skorzana",
+          "quantity": 1
+        }
+      ]
+    },
+    "dialog": {
+      "offer": "Większość ludzi stoi przy martwym terminalu i czeka, aż znowu im coś powie. Pomożesz mi sprawdzić, czy w tobie została jeszcze iskra? Zacznij od Haliny z biblioteki.",
+      "progress": "No i? Jeszcze nie skończyłeś.",
+      "complete": "Masz tu trochę c-coinów. Chmura, w której siedzą, jakimś cudem jeszcze działa. Nie pytaj mnie jak — nikt już nie wie."
+    }
+  },
+  {
+    "code": "zlom-za-ccoiny",
+    "title": "Złom za c-coiny",
+    "description": "Ola skupuje złom z wraku autobusu na parkingu Galerii.",
+    "giverNpc": "zbieraczka-ola",
+    "minLevel": 1,
+    "repeatable": true,
+    "sortOrder": 2,
+    "steps": [
+      {
+        "type": "VISIT",
+        "target": "ruiny",
+        "x": 30,
+        "y": 10,
+        "radius": 1,
+        "text": "Przeszukaj wrak autobusu na parkingu (wschód)."
+      },
+      {
+        "type": "TALK",
+        "target": "zbieraczka-ola",
+        "text": "Wróć do Oli z łupem.",
+        "dialog": "Bateria i kabel! Ludzie przechodzą obok tego wraku codziennie i nikt nie wpadł, żeby zajrzeć do środka. Masz, twoja działka."
+      }
+    ],
+    "rewards": {
+      "ccoin": 10,
+      "xp": 40,
+      "items": [
+        {
+          "code": "bateria",
+          "quantity": 1
+        },
+        {
+          "code": "kabel-miedziany",
+          "quantity": 1
+        }
+      ]
+    },
+    "dialog": {
+      "offer": "Widzisz ten autobus na parkingu? W środku zawsze coś zostaje. Przeszukaj go, a ja kupię, co znajdziesz. Codziennie coś nowego się tam zsuwa.",
+      "progress": "Autobus jest na parkingu na wschodzie. Ten duży, rdzawy. Nie da się go przegapić. Chyba.",
+      "complete": "Wracaj, kiedy chcesz. Złomu nie zabraknie, ludzi myślących — owszem."
+    }
+  },
+  {
+    "code": "prad-z-niczego",
+    "title": "Prąd z niczego",
+    "description": "Mechanik Rysiek buduje generator. Potrzebuje baterii.",
+    "giverNpc": "mechanik-rysiek",
+    "minLevel": 2,
+    "repeatable": false,
+    "sortOrder": 3,
+    "steps": [
+      {
+        "type": "COLLECT",
+        "target": "bateria",
+        "count": 3,
+        "consume": false,
+        "text": "Zdobądź 3 baterie R20 (Ola z Ruin skupuje złom)."
+      },
+      {
+        "type": "TALK",
+        "target": "mechanik-rysiek",
+        "text": "Zanieś baterie Ryśkowi do warsztatu.",
+        "dialog": "Trzy! Dobra, patrz: plus do plusa, minus do minusa. Nie, nie zapytam AI. Bo nie ma kogo. Działa! Świeci! Zrozumiałeś, co zrobiłem? Ja też nie do końca."
+      },
+      {
+        "type": "COLLECT",
+        "target": "bateria",
+        "count": 3,
+        "consume": true,
+        "text": "Oddaj baterie Ryśkowi."
+      }
+    ],
+    "rewards": {
+      "ccoin": 60,
+      "xp": 200,
+      "items": [
+        {
+          "code": "latarka-dynamo",
+          "quantity": 1
+        }
+      ]
+    },
+    "dialog": {
+      "offer": "Buduję generator. Prawdziwy, z drutów i baterii, bez żadnej chmury. Potrzebuję trzech baterii R20. Przynieś, a dostaniesz coś, co świeci bez prądu.",
+      "progress": "Trzy baterie. Trzy. Policz na palcach, jak trzeba.",
+      "complete": "Masz latarkę na dynamo. Kręcisz — świeci. Jedyna technologia, którą każdy jeszcze rozumie."
+    }
+  }
+]

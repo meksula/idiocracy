@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OFFLINE 2074</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    #app { height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+    #topbar { display: flex; align-items: center; gap: 18px; padding: 6px 14px; border-bottom: 2px solid var(--line); background: rgba(0,0,0,.45); }
+    #topbar .logo { font-size: 20px; animation: none; text-shadow: 2px 0 var(--red-dim), -2px 0 var(--teal); }
+    #topbar .loc { color: var(--text-hi); }
+    #stage { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; padding: 12px; min-height: 0; }
+    #left { display: grid; grid-template-rows: minmax(0, 1fr) 190px; gap: 12px; min-height: 0; min-width: 0; }
+    #viewport { position: relative; display: flex; align-items: center; justify-content: center; min-height: 0; background: #000; border: 2px solid var(--line); }
+    #world { image-rendering: pixelated; display: block; }
+    #viewport { overflow: hidden; }
+    #side { overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding-top: 10px; padding-right: 4px; }
+
+    .char-head { display: flex; gap: 12px; align-items: center; }
+    #portrait { background: #08090c; border: 2px solid var(--line); }
+    #char-name { font-size: 26px; color: var(--text-hi); }
+    .bar { position: relative; height: 20px; background: #08090c; border: 2px solid #000; margin-top: 6px; }
+    .bar .fill { height: 100%; transition: width .3s; }
+    .bar .label { position: absolute; inset: 0; text-align: center; font-size: 17px; line-height: 16px; color: var(--text-hi); text-shadow: 1px 1px 0 #000; }
+    #hp-fill { background: linear-gradient(#ff5a4a, #b8323a); }
+    #xp-fill { background: linear-gradient(#3fe0d0, #1b7a8c); }
+    #char-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; margin-top: 10px; font-size: 18px; }
+    #char-stats .stat { display: flex; justify-content: space-between; }
+    #char-stats b { color: var(--neon); font-weight: 400; }
+
+    .slots { display: grid; gap: 4px; }
+    #equipment { grid-template-columns: repeat(2, 1fr); }
+    #bag { grid-template-columns: repeat(6, 1fr); }
+    .slot { position: relative; aspect-ratio: 1; background: #08090c; border: 2px solid var(--line); display: flex; align-items: center; justify-content: center; cursor: default; }
+    .slot.eq { aspect-ratio: auto; height: 44px; justify-content: flex-start; padding-left: 6px; }
+    .slot canvas { width: 32px; height: 32px; }
+    .slot:has(canvas) { cursor: pointer; }
+    .slot:has(canvas):hover { border-color: var(--teal); }
+    .slot.r-UNCOMMON { border-color: #4f7a3a; }
+    .slot.r-RARE { border-color: #3b5bab; }
+    .slot.r-EPIC { border-color: #a03ec8; }
+    .slot.r-LEGENDARY { border-color: #e8a04a; }
+    .slot-label { color: var(--line-2); font-size: 16px; }
+    .qty { position: absolute; right: 2px; bottom: 0; font-size: 16px; color: var(--text-hi); text-shadow: 1px 1px 0 #000; }
+
+    #quests .quest { border-left: 3px solid var(--amber); padding-left: 8px; margin-bottom: 10px; }
+    #quests .q-title { color: var(--amber); font-size: 21px; }
+    #quests .q-obj { color: var(--text-hi); }
+    #quests .q-step { font-size: 16px; }
+    #quests .q-done { font-size: 16px; margin-top: 6px; }
+    #minimap { position: absolute; top: 10px; right: 10px; width: 200px; image-rendering: pixelated; background: #000; border: 2px solid var(--line); opacity: .85; z-index: 5; }
+    #minimap:hover { opacity: .25; }
+
+    #chat { display: grid; grid-template-rows: 1fr auto; min-height: 0; padding: 8px 10px; }
+    #chat-log { overflow-y: auto; font-size: 18px; }
+    #chat-log .line { padding: 1px 0; }
+    #chat-log .ts { color: var(--line-2); }
+    #chat-log .from { color: var(--neon); }
+    #chat-log .system { color: var(--amber); }
+    #chat-log .error { color: var(--red); }
+    #chat-input { margin-top: 6px; padding: 4px 8px; }
+
+    #dialog { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(640px, 94%); background: rgba(13,14,18,.96); border: 2px solid var(--amber); box-shadow: 0 0 0 2px #000, 0 10px 30px rgba(0,0,0,.6); padding: 12px 16px; z-index: 10; }
+    #dialog .d-head { display: flex; gap: 12px; align-items: center; border-bottom: 2px solid var(--line); padding-bottom: 8px; }
+    #dialog .d-head canvas { background: #08090c; border: 2px solid var(--line); }
+    #dialog .d-name { color: var(--amber); font-size: 28px; letter-spacing: 1px; }
+    #dialog .d-body p { margin: 8px 0; font-size: 21px; color: var(--text-hi); }
+    #dialog .d-opts { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+    #dialog .d-opts button { justify-content: flex-start; text-transform: none; }
+
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: flex; align-items: center; justify-content: center; z-index: 500; }
+    .modal .panel { max-width: 520px; }
+    .keys td:first-child { color: var(--neon); padding-right: 20px; white-space: nowrap; }
+
+    @media (max-width: 1000px) {
+      html, body { overflow: auto; }
+      #app { height: auto; }
+      #stage { grid-template-columns: 1fr; }
+      #left { grid-template-rows: 70vh 190px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div class="logo">OFFLINE 2074</div>
+    <span class="no-signal">NO SIGNAL</span>
+    <span class="loc" id="loc">…</span>
+    <span class="spacer"></span>
+    <span class="muted">ping <span id="ping">–</span></span>
+    <span class="ccoin" id="ccoin">0</span>
+    <button class="secondary small" id="help-btn">Pomoc [H]</button>
+    <a class="btn secondary small" href="/characters.html">Postacie</a>
+  </header>
+
+  <div id="stage">
+    <div id="left">
+      <div id="viewport">
+        <canvas id="world" class="pixel"></canvas>
+        <canvas id="minimap" width="200" height="150" title="Minimapa"></canvas>
+        <div id="dialog" class="hidden"></div>
+      </div>
+      <div id="chat" class="panel">
+        <span class="panel-title">Kanał lokalny</span>
+        <div id="chat-log"></div>
+        <input id="chat-input" maxlength="200" placeholder="Enter — pisz · /help — komendy" autocomplete="off">
+      </div>
+    </div>
+
+    <aside id="side">
+      <div class="panel">
+        <span class="panel-title">Postać</span>
+        <div class="char-head">
+          <canvas id="portrait" class="pixel" width="64" height="64"></canvas>
+          <div>
+            <div id="char-name">…</div>
+            <div class="muted" id="char-sub"></div>
+          </div>
+        </div>
+        <div class="bar"><div class="fill" id="hp-fill"></div><div class="label" id="hp-label"></div></div>
+        <div class="bar"><div class="fill" id="xp-fill"></div><div class="label" id="xp-label"></div></div>
+        <div id="char-stats"></div>
+      </div>
+      <div class="panel">
+        <span class="panel-title">Misje</span>
+        <div id="quests"></div>
+      </div>
+      <div class="panel">
+        <span class="panel-title">Założone</span>
+        <div class="slots" id="equipment"></div>
+      </div>
+      <div class="panel">
+        <span class="panel-title">Plecak</span>
+        <div class="slots" id="bag"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div id="help" class="modal hidden">
+  <div class="panel rust">
+    <span class="panel-title">Instrukcja dla nie-myślących</span>
+    <table class="keys">
+      <tr><td>WASD / strzałki</td><td>ruch</td></tr>
+      <tr><td>Klik na mapie</td><td>idź tam (szuka drogi sam — ty nie musisz)</td></tr>
+      <tr><td>Klik na NPC / E</td><td>rozmowa z najbliższą osobą</td></tr>
+      <tr><td>Enter</td><td>czat lokalny (/help — komendy)</td></tr>
+      <tr><td>Alt (przytrzymaj)</td><td>pokaż imiona NPC</td></tr>
+      <tr><td>Klik w przedmiot</td><td>załóż / użyj / zdejmij</td></tr>
+      <tr><td>Esc</td><td>zamknij okno</td></tr>
+    </table>
+    <p class="muted">„!” nad głową — ta osoba ma dla ciebie misję. „?” — czeka na ciebie w ramach misji. Turkusowe pola — przejścia do innych lokacji.</p>
+  </div>
+</div>
+
+<div id="disconnected" class="modal hidden">
+  <div class="panel rust" style="text-align:center">
+    <span class="panel-title">Brak sygnału</span>
+    <p class="no-signal">NO SIGNAL</p>
+    <p id="disc-reason"></p>
+    <div class="row" style="justify-content:center">
+      <button id="reconnect">Połącz ponownie</button>
+      <a class="btn secondary" href="/characters.html">Wybór postaci</a>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/js/game/main.js"></script>
+</body>
+</html>

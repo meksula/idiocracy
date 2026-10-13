@@ -1,0 +1,767 @@
+[
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": "WEAPON",
+  "code": "rura-stalowa",
+  "name": "Rura stalowa",
+  "type": "WEAPON",
+  "rarity": "COMMON",
+  "description": "Kiedyś woda, dziś argument. Najpopularniejsza broń 2074 roku.",
+  "stats": {
+   "strength": 1,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 4,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 12,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "...........000..",
+     "..........03330.",
+     "..........03530.",
+     "..........03330.",
+     ".........05430..",
+     "........05430...",
+     ".......05R30....",
+     "......05430.....",
+     ".....05430......",
+     "....05R30.......",
+     "...05430........",
+     "..05430.........",
+     "..0430..........",
+     "...00...........",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": "WEAPON",
+  "code": "klucz-francuski",
+  "name": "Klucz francuski",
+  "type": "WEAPON",
+  "rarity": "COMMON",
+  "description": "Odkręca śruby i problemy. Technicy nie rozstają się z nim nawet przez sen.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 1,
+   "attack": 3,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 15,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     ".........00000..",
+     "........0554440.",
+     "........0440040.",
+     "........044000..",
+     "........0444440.",
+     "........0444440.",
+     "........043000..",
+     ".......0430.....",
+     "......0430......",
+     "..0000430.......",
+     ".0333430........",
+     ".033330.........",
+     ".03330..........",
+     "..000...........",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 2,
+  "wearColor": null,
+  "slot": "WEAPON",
+  "code": "klawiatura-bojowa",
+  "name": "Klawiatura bojowa",
+  "type": "WEAPON",
+  "rarity": "UNCOMMON",
+  "description": "Mechaniczna, podświetlana. Nikt już nie pamięta, jak się na niej pisze, ale bije się nią świetnie.",
+  "stats": {
+   "strength": 0,
+   "agility": 1,
+   "vitality": 0,
+   "intellect": -1,
+   "attack": 6,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 40,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "................",
+     ".00000000000000.",
+     "0333333333333310",
+     "0352525252525n10",
+     "0322222222222210",
+     "0352525252525210",
+     "0322222222222210",
+     "0352666666665210",
+     "0111111111111110",
+     ".00000000000000.",
+     "................",
+     "................",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": "b",
+  "slot": "BODY",
+  "code": "kurtka-skorzana",
+  "name": "Kurtka skórzana",
+  "type": "ARMOR",
+  "rarity": "COMMON",
+  "description": "Prawdziwa skóra z prawdziwego lumpeksu.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 1,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 3,
+   "heal": 0
+  },
+  "price": 20,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "....00000000....",
+     "..00bBbB1bBb00..",
+     ".0bbbbbB1bbbbb0.",
+     ".0bbbbbB1bbbbb0.",
+     ".0bbbbbB1bbbbb0.",
+     ".0bbbbbB1bbbbb0.",
+     ".0bbbbbB1bbbbb0.",
+     ".0bbbbbB1bbbbb0.",
+     ".0bbbbbB1bbbbb0.",
+     ".0bbbbbB1bbbbb0.",
+     "..00bbbB1bbb00..",
+     "...0BBBBBBBB0...",
+     "....00000000....",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": "O",
+  "slot": "BODY",
+  "code": "kamizelka-odblaskowa",
+  "name": "Kamizelka odblaskowa",
+  "type": "ARMOR",
+  "rarity": "COMMON",
+  "description": "Widać cię z daleka. W świecie bez GPS to zaleta — i wada.",
+  "stats": {
+   "strength": 0,
+   "agility": 1,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 2,
+   "heal": 0
+  },
+  "price": 18,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "....00....00....",
+     "...0oO0..0OO0...",
+     "...0oO0..0OO0...",
+     "...0oOO00OOO0...",
+     "...0oOO00OOO0...",
+     "...0oOO00OOO0...",
+     "...0o66006660...",
+     "...0oOO00OOO0...",
+     "...0oOO00OOO0...",
+     "...0o66006660...",
+     "...0oOO00OOO0...",
+     "...0oOO00OOO0...",
+     "....000..000....",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": "y",
+  "slot": "HEAD",
+  "code": "kask-budowlany",
+  "name": "Kask budowlany",
+  "type": "ARMOR",
+  "rarity": "COMMON",
+  "description": "Chroni przed spadającymi tynkami i pomysłami.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 2,
+   "heal": 0
+  },
+  "price": 10,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "................",
+     "........0.......",
+     ".....000O000....",
+     "....0yyyOyyy0...",
+     "...0y7yyOyyyy0..",
+     "..00yyyyOyyyy0..",
+     ".0OOOOOOOOOOOO0.",
+     ".0OOOOOOOOOOOO0.",
+     "..000000000000..",
+     "................",
+     "................",
+     "................",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": "5",
+  "slot": "HEAD",
+  "code": "czapka-z-folii",
+  "name": "Czapka z folii",
+  "type": "ARMOR",
+  "rarity": "UNCOMMON",
+  "description": "Chroni przed falami 9G, których nikt już nie nadaje. Pewność siebie +100%.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 2,
+   "intellect": -1,
+   "attack": 0,
+   "defense": 1,
+   "heal": 0
+  },
+  "price": 8,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "........0.......",
+     ".......040......",
+     ".......060......",
+     "......05550.....",
+     "......06660.....",
+     ".....0575550....",
+     ".....0666660....",
+     "....055555550...",
+     "....066666660...",
+     "...05555555550..",
+     "...06666666660..",
+     "..0444444444440.",
+     "...00000000000..",
+     "................",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": "g",
+  "slot": "LEGS",
+  "code": "spodnie-bojowki",
+  "name": "Bojówki",
+  "type": "ARMOR",
+  "rarity": "COMMON",
+  "description": "Dwanaście kieszeni. W każdej coś, czego nie pamiętasz.",
+  "stats": {
+   "strength": 0,
+   "agility": 1,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 2,
+   "heal": 0
+  },
+  "price": 14,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "....00000000....",
+     "...0GGGGGGGG0...",
+     "...0gggggggg0...",
+     "...0gggggggg0...",
+     "...0ggg00ggg0...",
+     "...0ggg00ggg0...",
+     "...0ggg00ggg0...",
+     "...0GGg00gGG0...",
+     "...0GGg00gGG0...",
+     "...0ggg00ggg0...",
+     "...0ggg00ggg0...",
+     "...0ggg00ggg0...",
+     "...0ggg00ggg0...",
+     "....000..000....",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": "b",
+  "slot": "FEET",
+  "code": "buty-robocze",
+  "name": "Buty robocze",
+  "type": "ARMOR",
+  "rarity": "COMMON",
+  "description": "Stalowe noski. Przetrwały upadek internetu, przetrwają i ciebie.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 1,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 1,
+   "heal": 0
+  },
+  "price": 12,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "................",
+     "..0000...0000...",
+     ".0Bbbb0.0Bbbb0..",
+     ".0Bbbb0.0Bbbb0..",
+     ".0Bbbb0.0Bbbb0..",
+     ".0Bbbb0.0Bbbb0..",
+     ".0Bbbb000Bbbb00.",
+     ".0Bbbbbb0Bbbbbb0",
+     ".0bbbbbb0bbbbbb0",
+     ".011111101111110",
+     "..000000.000000.",
+     "................",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": "ACCESSORY",
+  "code": "okulary-zerowki",
+  "name": "Okulary zerówki",
+  "type": "ARMOR",
+  "rarity": "UNCOMMON",
+  "description": "Nie poprawiają wzroku, ale wyglądasz w nich, jakbyś przeczytał książkę.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 2,
+   "attack": 0,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 30,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "................",
+     "................",
+     "....0......0....",
+     "0.00c000000c00.0",
+     "20cnccc22cnccc02",
+     "0cccccccccccccc0",
+     ".0ccccc00ccccc0.",
+     "..00c00..00c00..",
+     "....0......0....",
+     "................",
+     "................",
+     "................",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": "OFFHAND",
+  "code": "latarka-dynamo",
+  "name": "Latarka na dynamo",
+  "type": "ARMOR",
+  "rarity": "UNCOMMON",
+  "description": "Kręcisz — świeci. Najbardziej zrozumiała technologia, jaka została.",
+  "stats": {
+   "strength": 0,
+   "agility": 1,
+   "vitality": 0,
+   "intellect": 1,
+   "attack": 0,
+   "defense": 1,
+   "heal": 0
+  },
+  "price": 35,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "................",
+     "...........000..",
+     "...000000004440.",
+     "..04444444244y0.",
+     "..043RRR33244y0.",
+     "..043RoR33244y0.",
+     "..043RRR33244y0.",
+     "..02222222244y0.",
+     "...000000004440.",
+     "...........000..",
+     "................",
+     "................",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": true,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": null,
+  "code": "konserwa",
+  "name": "Konserwa turystyczna",
+  "type": "CONSUMABLE",
+  "rarity": "COMMON",
+  "description": "Data ważności: 2049. Smakuje dokładnie tak, jak brzmi.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 0,
+   "heal": 15
+  },
+  "price": 3,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "................",
+     "......00000.....",
+     "...00055555000..",
+     "..0555555555550.",
+     "..054455555430..",
+     "..054444444430..",
+     "..05xxxxxxxx30..",
+     "..05x777777x30..",
+     "..05xxxxxxxx30..",
+     "..054444444430..",
+     "..033333333330..",
+     "...0000000000...",
+     "................",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": true,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": null,
+  "code": "woda-filtrowana",
+  "name": "Woda filtrowana",
+  "type": "CONSUMABLE",
+  "rarity": "COMMON",
+  "description": "Przefiltrowana przez trzy koszulki i jedną skarpetę. Prawie czysta.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 0,
+   "heal": 10
+  },
+  "price": 2,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "......0000......",
+     ".....0xxxx0.....",
+     ".....055550.....",
+     ".....055550.....",
+     "....0UUUUUU0....",
+     "....0UnUUUU0....",
+     "....0UnUUUU0....",
+     "....0UnUUUU0....",
+     "....06666660....",
+     "....06UUUU60....",
+     "....06666660....",
+     "....0UnUUUU0....",
+     "....0UnUUUU0....",
+     "....0UUUUUU0....",
+     ".....000000.....",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": true,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": null,
+  "code": "bateria",
+  "name": "Bateria R20",
+  "type": "JUNK",
+  "rarity": "COMMON",
+  "description": "Ciężka, stara, pełna prądu. W 2074 warta więcej niż złoto.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 6,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     ".......00.......",
+     ".....005500.....",
+     "....0Uyyyyy0....",
+     "....0Uyyyyy0....",
+     "....0Uyyyyy0....",
+     "....0Uuuuuu0....",
+     "....0Uuuuuu0....",
+     "....0Uuuuuu0....",
+     "....0Uuu7uu0....",
+     "....0Uu777u0....",
+     "....0Uuuuuu0....",
+     "....0Uuuuuu0....",
+     "....0Uuuuuu0....",
+     ".....000000.....",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": true,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": null,
+  "code": "kabel-miedziany",
+  "name": "Kabel miedziany",
+  "type": "JUNK",
+  "rarity": "COMMON",
+  "description": "Zwój miedzi. Ktoś kiedyś przesyłał tym memy.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 4,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "................",
+     "........0.......",
+     ".....000o000....",
+     "....0oooooOo0...",
+     "...0ooooooooo0..",
+     "...0Oooo0oooo0..",
+     "...0ooo0.0ooo0..",
+     "..0ooo0...0ooo0.",
+     "...0ooo0.0oooo0.",
+     "...0oooo0ooooo0.",
+     "...0ooooooooo0o0",
+     "....0ooooooo00o0",
+     ".....000o000..0o",
+     "........0.....0o",
+     "...............0"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": true,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": null,
+  "code": "chip-ai-martwy",
+  "name": "Martwy chip AI",
+  "type": "JUNK",
+  "rarity": "RARE",
+  "description": "Kiedyś wiedział wszystko. Dziś jest ładnym przyciskiem do papieru.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 50,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     ".....0.0.0.0....",
+     "....050505050...",
+     "....040404040...",
+     "..003333333100..",
+     ".05432222221450.",
+     "..0032cccc2100..",
+     ".05432cCcc21450.",
+     "..0032cccc2100..",
+     ".05432cccc21450.",
+     "..003222222100..",
+     ".05411111111450.",
+     "..000404040400..",
+     "....050505050...",
+     ".....0.0.0.0....",
+     "................"
+    ]
+   ]
+  }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": null,
+  "code": "encyklopedia-tom-3",
+  "name": "Encyklopedia, tom 3",
+  "type": "QUEST",
+  "rarity": "RARE",
+  "description": "Hasła od „Gab” do „Kaz”. Papierowa wiedza — najrzadszy surowiec 2074.",
+  "stats": {
+   "strength": 0,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 0,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 0,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     "...0000000000...",
+     "..0rxxxxxxxxx0..",
+     "..0rxxxxxxxx60..",
+     "..0rxxOOOOOx60..",
+     "..0rxxOOOOOx60..",
+     "..0rxxxxxxxx60..",
+     "..0rxxxxxxxx60..",
+     "..0rxxRRRRRx60..",
+     "..0rxxxxxxxx60..",
+     "..0rxxxxxxxx60..",
+     "..0rxxxxxxxx60..",
+     "..0rxxxxxxxx60..",
+     "..0r6666666660..",
+     "...0000000000...",
+     "................"
+    ]
+   ]
+  }
+ }
+]

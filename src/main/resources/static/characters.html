@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Postacie — OFFLINE 2074</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <style>
+    header { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 2px solid var(--line); background: rgba(0,0,0,.3); }
+    header .logo { font-size: 28px; animation: none; }
+    main { max-width: 1180px; margin: 0 auto; padding: 32px 16px; display: grid; grid-template-columns: 360px 1fr; gap: 32px; }
+    .chars { display: flex; flex-direction: column; gap: 12px; }
+    .char { display: flex; gap: 12px; align-items: center; padding: 10px; border: 2px solid var(--line); background: var(--bg-2); cursor: pointer; }
+    .char:hover, .char.sel { border-color: var(--teal); }
+    .char canvas { background: #08090c; border: 1px solid var(--line); }
+    .char .meta { flex: 1; }
+    .char .name { color: var(--text-hi); font-size: 24px; }
+    .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+    .card { border: 2px solid var(--line); background: var(--bg-2); padding: 10px; cursor: pointer; }
+    .card:hover { border-color: var(--line-2); }
+    .card.sel { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber) inset; }
+    .card .title { color: var(--text-hi); font-size: 22px; }
+    .card .desc { color: var(--muted); font-size: 17px; margin: 4px 0; }
+    .card .st { font-size: 16px; color: var(--neon); }
+    .creator { display: grid; grid-template-columns: 1fr 220px; gap: 24px; }
+    .preview { text-align: center; }
+    .preview canvas { background: repeating-conic-gradient(#14161b 0 25%, #101216 0 50%) 0 0 / 24px 24px; border: 2px solid var(--line); }
+    .swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+    .swatch { width: 28px; height: 28px; border: 2px solid #000; cursor: pointer; }
+    .swatch.sel { outline: 2px solid var(--amber); outline-offset: 2px; }
+    .stats-table { width: 100%; font-size: 19px; margin-top: 10px; }
+    .stats-table td:last-child { text-align: right; color: var(--neon); }
+    section h2 { margin-top: 18px; }
+    @media (max-width: 900px) { main { grid-template-columns: 1fr; } .creator { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">OFFLINE 2074</div>
+  <span class="no-signal">NO SIGNAL</span>
+  <span class="spacer"></span>
+  <span class="muted" id="who"></span>
+  <a class="btn neon hidden" id="editor-link" href="/editor.html">Edytor świata</a>
+  <button class="secondary" id="logout">Wyloguj</button>
+</header>
+<main>
+  <section>
+    <div class="panel">
+      <span class="panel-title">Twoje postacie</span>
+      <div class="chars" id="chars"></div>
+      <div class="row" style="margin-top:14px">
+        <button id="play" disabled>Graj</button>
+        <span class="spacer"></span>
+        <button class="danger small" id="delete" disabled>Usuń</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel rust">
+    <span class="panel-title">Nowa postać</span>
+    <div class="creator">
+      <div>
+        <label for="name">Imię (3–16 znaków)</label>
+        <input id="name" maxlength="16" placeholder="np. Zdzisław Bezchmurny">
+        <h2>Rasa</h2>
+        <div class="grid-cards" id="races"></div>
+        <h2>Klasa</h2>
+        <div class="grid-cards" id="classes"></div>
+        <h2>Fryzura</h2>
+        <div class="swatches" id="hair"></div>
+      </div>
+      <div class="preview">
+        <canvas id="preview" class="pixel" width="192" height="192"></canvas>
+        <div class="muted" style="margin-top:6px">Podgląd (zmienia kierunek)</div>
+        <table class="stats-table" id="stats"></table>
+        <button id="create" style="width:100%;margin-top:14px">Stwórz postać</button>
+        <div class="error" id="error"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script type="module">
+  import { api, logout, requireSession } from '/js/api.js';
+  import { el, toast, STAT_NAMES } from '/js/ui.js';
+  import { PALETTE } from '/js/palette.js';
+  import { characterCanvas } from '/js/charsprite.js';
+
+  const s = requireSession();
+  const $ = (id) => document.getElementById(id);
+  $('who').textContent = s.email;
+  if (s.role === 'ADMIN') $('editor-link').classList.remove('hidden');
+  $('logout').onclick = logout;
+
+  const HAIR = ['B', 'b', '0', '1', '3', '6', '7', 'y', 'O', 'o', 'R', 'x', 'm', 'P', 'n', 'l', 'G', 'U'];
+  const state = { race: null, clazz: null, hair: null, selected: null };
+  let content = null, characters = [];
+
+  async function loadChars() {
+    characters = await api('/api/characters');
+    const box = $('chars');
+    box.innerHTML = '';
+    if (!characters.length) box.append(el('div', { class: 'muted', text: 'Nie masz jeszcze postaci. Stwórz pierwszą →' }));
+    for (const c of characters) {
+      const cv = el('canvas', { class: 'pixel', width: 64, height: 64 });
+      cv.getContext('2d').drawImage(characterCanvas(c.appearance, 'S', 0, 4), 0, 0);
+      const row = el('div', { class: 'char', ondblclick: () => play(c.id), onclick: () => select(c.id) },
+        cv,
+        el('div', { class: 'meta' },
+          el('div', { class: 'name', text: c.name }),
+          el('div', { class: 'muted', text: `Poz. ${c.level} · ${c.raceName} · ${c.className}` }),
+          el('div', { class: 'row' }, el('span', { class: 'muted', text: c.mapName }), el('span', { class: 'spacer' }), el('span', { class: 'ccoin', text: c.ccoin })),
+        ));
+      row.dataset.id = c.id;
+      box.append(row);
+    }
+    select(state.selected && characters.some(c => c.id === state.selected) ? state.selected : characters[0]?.id);
+  }
+
+  function select(id) {
+    state.selected = id ?? null;
+    document.querySelectorAll('.char').forEach(r => r.classList.toggle('sel', Number(r.dataset.id) === id));
+    $('play').disabled = $('delete').disabled = !id;
+  }
+
+  function play(id) { location.href = `/game.html?character=${id}`; }
+  $('play').onclick = () => state.selected && play(state.selected);
+  $('delete').onclick = async () => {
+    const c = characters.find(x => x.id === state.selected);
+    if (!c || !confirm(`Na pewno usunąć postać ${c.name}? Tego nie da się cofnąć.`)) return;
+    await api(`/api/characters/${c.id}`, { method: 'DELETE' });
+    toast(`${c.name} odszedł w niebyt.`);
+    loadChars();
+  };
+
+  function cards(list, box, key) {
+    box.innerHTML = '';
+    for (const item of list) {
+      const st = Object.entries(item.stats).filter(([, v]) => v).map(([k, v]) => `${STAT_NAMES[k].slice(0, 3)} ${v > 0 ? '+' : ''}${v}`).join(' · ');
+      const card = el('div', { class: 'card', onclick: () => { state[key] = item.code; refresh(); } },
+        el('div', { class: 'title', text: item.name }),
+        el('div', { class: 'desc', text: item.description }),
+        el('div', { class: 'st', text: st }));
+      card.dataset.code = item.code;
+      box.append(card);
+    }
+  }
+
+  function appearance() {
+    const r = content.races.find(x => x.code === state.race)?.appearance || {};
+    const c = content.classes.find(x => x.code === state.clazz)?.appearance || {};
+    const pick = (k) => (k === 'hair' && state.hair) || r[k] || c[k];
+    return Object.fromEntries(['skin', 'hair', 'eyes', 'primary', 'secondary', 'feet'].map(k => [k, pick(k)]));
+  }
+
+  function refresh() {
+    document.querySelectorAll('#races .card').forEach(c => c.classList.toggle('sel', c.dataset.code === state.race));
+    document.querySelectorAll('#classes .card').forEach(c => c.classList.toggle('sel', c.dataset.code === state.clazz));
+    document.querySelectorAll('.swatch').forEach(c => c.classList.toggle('sel', c.dataset.key === state.hair));
+    const r = content.races.find(x => x.code === state.race)?.stats || {};
+    const c = content.classes.find(x => x.code === state.clazz)?.stats || {};
+    $('stats').innerHTML = '';
+    for (const k of ['strength', 'agility', 'vitality', 'intellect']) {
+      $('stats').append(el('tr', {}, el('td', { text: STAT_NAMES[k] }), el('td', { text: (r[k] || 0) + (c[k] || 0) })));
+    }
+  }
+
+  let dirIdx = 0, frame = 0;
+  setInterval(() => {
+    if (!content) return;
+    frame = (frame + 1) % 4;
+    if (frame === 0) dirIdx = (dirIdx + 1) % 4;
+    const dir = ['S', 'E', 'N', 'W'][dirIdx];
+    const ctx = $('preview').getContext('2d');
+    ctx.clearRect(0, 0, 192, 192);
+    ctx.drawImage(characterCanvas(appearance(), dir, [0, 1, 0, 2][frame], 12), 0, 0);
+  }, 220);
+
+  $('create').onclick = async () => {
+    $('error').textContent = '';
+    try {
+      const c = await api('/api/characters', { method: 'POST', body: { name: $('name').value, race: state.race, clazz: state.clazz, hair: state.hair } });
+      toast(`${c.name} budzi się w Osadzie Reboot.`);
+      $('name').value = '';
+      state.selected = c.id;
+      await loadChars();
+    } catch (e) { $('error').textContent = e.message; }
+  };
+
+  content = await api('/api/content/bootstrap');
+  cards(content.races, $('races'), 'race');
+  cards(content.classes, $('classes'), 'clazz');
+  for (const k of HAIR) {
+    const sw = el('div', { class: 'swatch', style: { background: PALETTE[k] }, title: k, onclick: () => { state.hair = k; refresh(); } });
+    sw.dataset.key = k;
+    $('hair').append(sw);
+  }
+  state.race = content.races[0]?.code;
+  state.clazz = content.classes[0]?.code;
+  state.hair = 'B';
+  refresh();
+  loadChars();
+</script>
+</body>
+</html>

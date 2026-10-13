@@ -1,0 +1,210 @@
+/* =========================================================
+   OFFLINE 2074 — motyw "NO SIGNAL"
+   Ciemny beton, rdza, resztki neonu. Kolory = paleta gry.
+   ========================================================= */
+:root {
+  --bg: #0d0e12;
+  --bg-2: #15171d;
+  --panel: #1f2129;
+  --panel-2: #262934;
+  --line: #353845;
+  --line-2: #4f5363;
+  --muted: #737889;
+  --text: #d3d5db;
+  --text-hi: #f4f4f0;
+  --rust: #8f4426;
+  --orange: #c46a2b;
+  --amber: #e8a04a;
+  --yellow: #f2d16b;
+  --toxic: #8fbf3f;
+  --teal: #1b7a8c;
+  --neon: #3fe0d0;
+  --pink: #ff4fa3;
+  --magenta: #a03ec8;
+  --red: #ff5a4a;
+  --red-dim: #b8323a;
+  --blue: #3b5bab;
+  --font-ui: 'VT323', 'Courier New', monospace;
+  --font-head: 'Silkscreen', 'VT323', monospace;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% -20%, rgba(27, 122, 140, 0.18), transparent 60%),
+    radial-gradient(ellipse at 100% 120%, rgba(143, 68, 38, 0.22), transparent 55%),
+    var(--bg);
+}
+
+/* subtelne linie CRT nad wszystkim */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, 0.18) 3px);
+  z-index: 1000;
+}
+
+a { color: var(--neon); }
+h1, h2, h3 { font-family: var(--font-head); font-weight: 400; margin: 0 0 .5em; letter-spacing: 1px; }
+h2 { font-size: 22px; color: var(--amber); }
+h3 { font-size: 16px; color: var(--amber); text-transform: uppercase; }
+
+/* ---------- logo ---------- */
+.logo {
+  font-family: var(--font-head);
+  font-size: clamp(34px, 7vw, 64px);
+  color: var(--text-hi);
+  letter-spacing: 3px;
+  position: relative;
+  display: inline-block;
+  text-shadow: 3px 0 var(--red-dim), -3px 0 var(--teal);
+  animation: glitch 6s infinite steps(1);
+}
+.logo small { display: block; font-size: .32em; letter-spacing: 6px; color: var(--amber); text-shadow: none; margin-top: 6px; }
+@keyframes glitch {
+  0%, 92%, 100% { transform: none; text-shadow: 3px 0 var(--red-dim), -3px 0 var(--teal); }
+  93% { transform: translateX(-3px) skewX(-8deg); text-shadow: -5px 0 var(--pink), 5px 0 var(--neon); }
+  95% { transform: translateX(4px); text-shadow: 6px 0 var(--red), -2px 0 var(--neon); }
+  97% { transform: none; opacity: .7; }
+}
+
+.no-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--red);
+  font-size: 18px;
+  letter-spacing: 3px;
+}
+.no-signal::before {
+  content: '';
+  width: 10px; height: 10px;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  animation: blink 1.4s infinite steps(1);
+}
+@keyframes blink { 50% { opacity: 0.15; } }
+
+/* ---------- panele ---------- */
+.panel {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 2px solid var(--line);
+  box-shadow: inset 0 0 0 1px #000, 0 6px 0 rgba(0, 0, 0, 0.35);
+  padding: 14px 16px;
+  position: relative;
+}
+.panel.rust { border-color: var(--rust); }
+.panel > .panel-title {
+  position: absolute;
+  top: -12px; left: 12px;
+  padding: 0 8px;
+  background: var(--bg);
+  color: var(--amber);
+  font-family: var(--font-head);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ---------- formularze ---------- */
+label { display: block; color: var(--muted); font-size: 18px; margin: 10px 0 4px; }
+input, select, textarea, button {
+  font-family: var(--font-ui);
+  font-size: 20px;
+  color: var(--text-hi);
+}
+input, select, textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 2px solid var(--line);
+  padding: 6px 10px;
+  outline: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 1px var(--neon) inset; }
+textarea { resize: vertical; min-height: 70px; }
+input[type="checkbox"] { width: auto; }
+
+button, .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--rust);
+  border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 var(--orange), inset -2px -2px 0 #4a1f12;
+  padding: 6px 16px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  color: var(--text-hi);
+}
+button:hover, .btn:hover { filter: brightness(1.15); }
+button:active, .btn:active { box-shadow: inset -2px -2px 0 var(--orange), inset 2px 2px 0 #4a1f12; }
+button:disabled { filter: grayscale(1) brightness(.6); cursor: not-allowed; }
+button.secondary, .btn.secondary { background: var(--line); box-shadow: inset 2px 2px 0 var(--line-2), inset -2px -2px 0 #1a1b22; }
+button.neon, .btn.neon { background: var(--teal); box-shadow: inset 2px 2px 0 var(--neon), inset -2px -2px 0 #0b2e37; }
+button.danger { background: var(--red-dim); box-shadow: inset 2px 2px 0 var(--red), inset -2px -2px 0 #5a1219; }
+button.small { padding: 2px 10px; font-size: 18px; }
+
+.error { color: var(--red); min-height: 1.2em; }
+.muted { color: var(--muted); }
+.hi { color: var(--text-hi); }
+.amber { color: var(--amber); }
+.neon-text { color: var(--neon); }
+.ccoin { color: var(--yellow); white-space: nowrap; }
+.ccoin::before { content: '◈ '; color: var(--neon); }
+
+.row { display: flex; gap: 12px; align-items: center; }
+.row.wrap { flex-wrap: wrap; }
+.spacer { flex: 1; }
+.hidden { display: none !important; }
+
+/* ---------- rzadkosc przedmiotow ---------- */
+.r-COMMON { color: var(--text); }
+.r-UNCOMMON { color: var(--toxic); }
+.r-RARE { color: #6aa8ff; }
+.r-EPIC { color: var(--magenta); }
+.r-LEGENDARY { color: var(--amber); }
+
+/* ---------- tooltip ---------- */
+.tooltip {
+  position: fixed;
+  z-index: 900;
+  max-width: 300px;
+  background: rgba(13, 14, 18, 0.97);
+  border: 2px solid var(--line-2);
+  padding: 8px 10px;
+  pointer-events: none;
+  font-size: 18px;
+}
+.tooltip .t-name { font-size: 21px; }
+.tooltip .t-desc { color: var(--muted); font-style: italic; margin-top: 6px; }
+.tooltip .t-stat { color: var(--neon); }
+.tooltip .t-stat.neg { color: var(--red); }
+
+/* ---------- toast ---------- */
+#toasts { position: fixed; top: 16px; right: 16px; z-index: 950; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: var(--panel); border: 2px solid var(--teal); padding: 8px 14px; animation: toast-in .2s ease-out; }
+.toast.error { border-color: var(--red); color: var(--text-hi); }
+@keyframes toast-in { from { transform: translateX(30px); opacity: 0; } }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line); border: 2px solid var(--bg); }
+
+canvas.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }

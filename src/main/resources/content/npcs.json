@@ -1,0 +1,66 @@
+[
+  {
+    "code": "soltys-zenon",
+    "name": "Sołtys Zenon",
+    "mapCode": "osada",
+    "x": 18,
+    "y": 13,
+    "appearance": {
+      "skin": "s",
+      "hair": "6",
+      "eyes": "0",
+      "primary": "u",
+      "secondary": "2",
+      "feet": "1"
+    },
+    "greeting": "Witaj w Osadzie Reboot. Jestem tu sołtysem, bo jako jedyny pamiętam tabliczkę mnożenia do siedmiu."
+  },
+  {
+    "code": "bibliotekarka-halina",
+    "name": "Bibliotekarka Halina",
+    "mapCode": "osada",
+    "x": 32,
+    "y": 5,
+    "appearance": {
+      "skin": "S",
+      "hair": "x",
+      "eyes": "0",
+      "primary": "P",
+      "secondary": "p",
+      "feet": "b"
+    },
+    "greeting": "Ciii. To biblioteka. Ostatnie miejsce, gdzie wiedza nie potrzebuje prądu."
+  },
+  {
+    "code": "mechanik-rysiek",
+    "name": "Mechanik Rysiek",
+    "mapCode": "osada",
+    "x": 8,
+    "y": 24,
+    "appearance": {
+      "skin": "S",
+      "hair": "1",
+      "eyes": "0",
+      "primary": "U",
+      "secondary": "u",
+      "feet": "0"
+    },
+    "greeting": "Nie pytaj mnie, jak to działa. Pytaj, czy działa. Zwykle nie."
+  },
+  {
+    "code": "zbieraczka-ola",
+    "name": "Zbieraczka Ola",
+    "mapCode": "ruiny",
+    "x": 6,
+    "y": 12,
+    "appearance": {
+      "skin": "s",
+      "hair": "O",
+      "eyes": "0",
+      "primary": "g",
+      "secondary": "B",
+      "feet": "b"
+    },
+    "greeting": "Ruiny Galerii. Kiedyś ludzie przychodzili tu kupować rzeczy, których nie potrzebowali. Teraz my przychodzimy po rzeczy, których potrzebujemy."
+  }
+]

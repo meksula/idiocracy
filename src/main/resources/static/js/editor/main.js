@@ -54,7 +54,7 @@ function styleGuide() {
         el('div', { class: 'swatch big', style: { background: PALETTE[k] } }),
         el('code', { text: k }), el('span', { class: 'muted', text: `cień: ${SHADE[k]}` })))));
   }
-  const prompt = `Zaprojektuj ikonę przedmiotu do gry OFFLINE 2074 (pixel-art 16x16).
+  const prompt = `Zaprojektuj ikonę przedmiotu do gry Idiocracy (pixel-art 16x16).
 Używaj WYŁĄCZNIE znaków palety: ${Object.keys(PALETTE).join(' ')} oraz "." (przezroczystość).
 Zasady: czarny kontur "0" wokół kształtu, światło z lewej-góry, maks. 3-4 odcienie na obiekt,
 świat stonowany (szarości, rdza, zgniła zieleń), neon (c C n) tylko dla technologii, róż/fiolet (p P m) dla anomalii.

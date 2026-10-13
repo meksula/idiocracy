@@ -1,5 +1,5 @@
 -- ============================================================
--- OFFLINE 2074 - schemat bazowy
+-- Idiocracy - schemat bazowy
 -- Tresc gry (kafelki, rasy, klasy, przedmioty, mapy, NPC, misje)
 -- jest data-driven: kluczem jest czytelny "code", elastyczne
 -- czesci trzymamy w JSONB, zeby edytor mogl je swobodnie rozwijac.

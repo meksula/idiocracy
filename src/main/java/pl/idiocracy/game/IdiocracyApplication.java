@@ -9,9 +9,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @ConfigurationPropertiesScan
 @EnableScheduling
-public class OfflineApplication {
+public class IdiocracyApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OfflineApplication.class, args);
+        SpringApplication.run(IdiocracyApplication.class, args);
     }
 }

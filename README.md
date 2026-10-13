@@ -1,4 +1,4 @@
-# OFFLINE 2074
+# Idiocracy
 
 > Rok 2074. Burza magnetyczna wyłączyła wszystkie AI — jedyne źródło wiedzy ludzkości.
 > Okazało się, że od dawna nikt nie myślał samodzielnie. Działa tylko **c-coin**, waluta w chmurze,
@@ -14,7 +14,7 @@ przedmioty, kafelki, rasy, klasy).
 Wymagania: Java 21, Maven 3.9+, PostgreSQL 16 (albo Docker).
 
 ```bash
-docker compose up -d          # PostgreSQL: baza offline2074, user/hasło game/game
+docker compose up -d          # PostgreSQL: baza idiocracy, user/hasło game/game
 mvn spring-boot:run           # serwer na http://localhost:8080
 ```
 
@@ -90,7 +90,7 @@ Startowo: Osada Reboot i Ruiny Galerii Handlowej, 4 NPC, 3 misje (w tym łańcuc
 ```bash
 mvn test                                    # testy jednostkowe
 mvn verify                                  # + test integracyjny (Testcontainers, wymaga Dockera)
-TEST_DB_URL=jdbc:postgresql://localhost:5432/offline2074_test mvn verify   # albo na własnej bazie
+TEST_DB_URL=jdbc:postgresql://localhost:5432/idiocracy_test mvn verify   # albo na własnej bazie
 ```
 
 Test integracyjny przechodzi pełną ścieżkę: rejestracja → postać → WebSocket → ruch → rozmowa → misja → korekta serwera.

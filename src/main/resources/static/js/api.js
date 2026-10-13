@@ -1,5 +1,5 @@
 // Wspolny klient REST + przechowywanie sesji.
-const KEY = 'offline2074.session';
+const KEY = 'idiocracy.session';
 
 export function session() {
   try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; }

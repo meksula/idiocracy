@@ -1,8 +1,8 @@
 spring:
   application:
-    name: offline-2074
+    name: idiocracy
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/offline2074}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/idiocracy}
     username: ${DB_USER:game}
     password: ${DB_PASSWORD:game}
   jpa:
@@ -18,7 +18,7 @@ server:
   port: ${PORT:8080}
 
 game:
-  title: "OFFLINE 2074"
+  title: "Idiocracy"
   jwt-secret: ${JWT_SECRET:dev-secret-change-me-dev-secret-change-me-0123456789}
   jwt-ttl-hours: 168
   # Pierwsze zarejestrowane konto zawsze dostaje role ADMIN (wygodne na POC).

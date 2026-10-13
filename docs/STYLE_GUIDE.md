@@ -55,7 +55,7 @@ Dzięki temu nowa rasa, klasa czy kurtka „po prostu pasuje”.
 Wklej do rozmowy i uzupełnij opis:
 
 ```
-Zaprojektuj ikonę przedmiotu do gry OFFLINE 2074 (pixel-art 16x16).
+Zaprojektuj ikonę przedmiotu do gry Idiocracy (pixel-art 16x16).
 Używaj WYŁĄCZNIE znaków palety: 0 1 2 3 4 5 6 7 r R o O y b B k g G l c C n p P m s S d e x X u U
 oraz "." (przezroczystość).
 Zasady: czarny kontur "0" wokół kształtu, światło z lewej-góry, maks. 3-4 odcienie na obiekt,

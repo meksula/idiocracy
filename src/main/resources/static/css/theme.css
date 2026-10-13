@@ -1,5 +1,5 @@
 /* =========================================================
-   OFFLINE 2074 — motyw "NO SIGNAL"
+   Idiocracy — motyw "NO SIGNAL"
    Ciemny beton, rdza, resztki neonu. Kolory = paleta gry.
    ========================================================= */
 :root {
@@ -74,7 +74,7 @@ h3 { font-size: 16px; color: var(--amber); text-transform: uppercase; }
   text-shadow: 3px 0 var(--red-dim), -3px 0 var(--teal);
   animation: glitch 6s infinite steps(1);
 }
-.logo small { display: block; font-size: .32em; letter-spacing: 6px; color: var(--amber); text-shadow: none; margin-top: 6px; }
+.logo small { display: block; font-size: .28em; letter-spacing: 3px; white-space: nowrap; color: var(--amber); text-shadow: none; margin-top: 6px; }
 @keyframes glitch {
   0%, 92%, 100% { transform: none; text-shadow: 3px 0 var(--red-dim), -3px 0 var(--teal); }
   93% { transform: translateX(-3px) skewX(-8deg); text-shadow: -5px 0 var(--pink), 5px 0 var(--neon); }

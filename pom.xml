@@ -12,9 +12,9 @@
     </parent>
 
     <groupId>pl.idiocracy</groupId>
-    <artifactId>offline-2074</artifactId>
+    <artifactId>idiocracy</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>OFFLINE 2074</name>
+    <name>Idiocracy</name>
     <description>Przegladarkowy MMORPG 2D - rok 2074, ludzkosc bez AI.</description>
 
     <properties>

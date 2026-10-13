@@ -288,26 +288,101 @@ public class QuestEngine {
         return cq != null && cq.getStatus() == QuestStatus.ACTIVE && v.matches(cq.getStepIndex());
     }
 
+    /** Widoczni NPC na mapie, z pozycjami dopasowanymi do gracza (np. ci, ktorzy do niego podbiegli). */
     List<Npc> visibleNpcs(OnlinePlayer p, String mapCode) {
-        return content.npcsOn(mapCode).stream().filter(n -> isVisible(p, n)).toList();
+        return content.npcsOn(mapCode).stream().filter(n -> isVisible(p, n)).map(n -> locate(p, n)).toList();
     }
 
-    static Map<String, Object> npcView(Npc n) {
+    Npc locate(OnlinePlayer p, Npc n) {
+        int[] o = p.npcOverrides.get(n.getCode());
+        return o == null ? n : n.at(o[0], o[1]);
+    }
+
+    Map<String, Object> npcView(OnlinePlayer p, Npc n, boolean arriving) {
         Map<String, Object> m = Msg.of("npc", "code", n.getCode(), "name", n.getName(), "x", n.getX(), "y", n.getY(),
                 "dir", n.getDir(), "app", n.getAppearance());
         var v = n.getVisibility();
         if (v != null && v.fleeX() != null && v.fleeY() != null) {
             m.put("flee", Map.of("x", v.fleeX(), "y", v.fleeY()));
         }
+        if (arriving) {
+            Npc home = content.npc(n.getCode()).orElse(n);
+            m.put("arrive", Map.of("x", home.getX(), "y", home.getY()));
+            m.put("autoTalk", isTalkTarget(p, n));
+        }
         return m;
+    }
+
+    List<Map<String, Object>> npcViews(OnlinePlayer p, String mapCode) {
+        return visibleNpcs(p, mapCode).stream().map(n -> npcView(p, n, false)).toList();
+    }
+
+    /**
+     * NPC z flaga approach, ktory jest celem biezacego kroku TALK, dostaje miejsce obok gracza.
+     * Zwraca kody NPC, ktore wlasnie "przybiegaja".
+     */
+    private java.util.Set<String> placeApproaching(OnlinePlayer p) {
+        java.util.Set<String> arriving = new java.util.HashSet<>();
+        var map = content.map(p.mapCode).orElse(null);
+        for (Npc n : content.npcsOn(p.mapCode)) {
+            boolean visible = isVisible(p, n);
+            if (!visible) {
+                p.npcOverrides.remove(n.getCode());
+                continue;
+            }
+            if (map == null || n.getVisibility() == null || !n.getVisibility().approaches()) {
+                continue;
+            }
+            // podbiega tylko wtedy, gdy ma z graczem rozmawiac; potem wraca na swoje miejsce
+            if (!isTalkTarget(p, n)) {
+                p.npcOverrides.remove(n.getCode());
+                continue;
+            }
+            if (p.npcOverrides.containsKey(n.getCode())) {
+                continue;
+            }
+            int[] best = null;
+            int bestDist = Integer.MAX_VALUE;
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dy = -1; dy <= 1; dy++) {
+                    int x = p.x + dx;
+                    int y = p.y + dy;
+                    if ((dx == 0 && dy == 0) || !map.inBounds(x, y) || content.isSolidTile(map, x, y)) {
+                        continue;
+                    }
+                    int finalX = x;
+                    int finalY = y;
+                    boolean taken = content.npcsOn(p.mapCode).stream()
+                            .anyMatch(o -> o != n && isVisible(p, o) && locate(p, o).getX() == finalX && locate(p, o).getY() == finalY);
+                    int d = Math.abs(x - n.getX()) + Math.abs(y - n.getY()) + (dx != 0 && dy != 0 ? 1 : 0);
+                    if (!taken && d < bestDist) {
+                        best = new int[] {x, y};
+                        bestDist = d;
+                    }
+                }
+            }
+            if (best != null) {
+                p.npcOverrides.put(n.getCode(), best);
+                arriving.add(n.getCode());
+            }
+        }
+        return arriving;
+    }
+
+    private boolean isTalkTarget(OnlinePlayer p, Npc npc) {
+        return p.activeQuests().stream().anyMatch(cq -> {
+            QuestStep s = current(content.quest(cq.getQuestCode()).orElse(null), cq);
+            return s != null && s.type() == QuestStepType.TALK && npc.getCode().equals(s.target());
+        });
     }
 
     // ---------------------------------------------------------------- payloady
 
     void afterQuestChange(OnlinePlayer p) {
         notifier.send(p, Msg.of("quests", "quests", questLog(p)));
-        notifier.send(p, Msg.of("npcs", "npcs", visibleNpcs(p, p.mapCode).stream().map(QuestEngine::npcView).toList(),
-                "marks", markers(p)));
+        var arriving = placeApproaching(p);
+        notifier.send(p, Msg.of("npcs", "npcs", visibleNpcs(p, p.mapCode).stream()
+                .map(n -> npcView(p, n, arriving.contains(n.getCode()))).toList(), "marks", markers(p)));
     }
 
     List<Map<String, Object>> questLog(OnlinePlayer p) {
@@ -346,11 +421,7 @@ public class QuestEngine {
     Map<String, String> markers(OnlinePlayer p) {
         Map<String, String> marks = new LinkedHashMap<>();
         for (Npc npc : visibleNpcs(p, p.mapCode)) {
-            boolean talkTarget = p.activeQuests().stream().anyMatch(cq -> {
-                QuestStep s = current(content.quest(cq.getQuestCode()).orElse(null), cq);
-                return s != null && s.type() == QuestStepType.TALK && npc.getCode().equals(s.target());
-            });
-            if (talkTarget) {
+            if (isTalkTarget(p, npc)) {
                 marks.put(npc.getCode(), "?");
             } else if (content.questsFrom(npc.getCode()).stream().anyMatch(q -> isAvailable(p, q))) {
                 marks.put(npc.getCode(), "!");

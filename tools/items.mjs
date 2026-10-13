@@ -125,4 +125,10 @@ export const ITEMS = [
     stats: st(), price: 1,
     icon: S(g => { g.line(2, 12, 6, 9, 'S').line(6, 9, 10, 10, 'S').line(10, 10, 13, 5, 'S').set(13, 4, 's'); g.set(7, 9, 'G').set(11, 8, 'G'); g.rect(1, 12, 2, 2, 'B'); }),
   },
+  {
+    code: 'maczeta', name: 'Maczeta', type: 'WEAPON', slot: 'WEAPON', rarity: 'UNCOMMON',
+    description: 'Wyszczerbiona, ale ostra. Foxy twierdzi, że to najlepsze narzędzie do rozmów ze szczurami.',
+    stats: st({ attack: 6, strength: 1 }), price: 25,
+    icon: S(g => { g.line(5, 10, 13, 2, '5').line(6, 10, 14, 2, '6').line(6, 11, 14, 3, '4').line(7, 11, 14, 4, '4'); g.set(9, 7, '3').set(12, 4, '3'); g.line(2, 13, 5, 10, 'b').line(3, 14, 5, 12, 'r').set(4, 11, 'B'); }),
+  },
 ].map(i => ({ stackable: false, minLevel: 1, wearColor: null, slot: null, ...i }));

@@ -36,10 +36,28 @@
         ]
       },
       {
+        "type": "TALK",
+        "target": "foxy",
+        "text": "Ktoś biegnie w twoją stronę.",
+        "dialog": "* Zanim zdążysz ruszyć za nieznajomym, ktoś łapie cię za ramię. Dziewczyna, może dwudziestoletnia. Rude włosy związane byle jak, plecak większy od niej.\n* Bez słowa wali cię otwartą dłonią w potylicę.\n> Au! Za co?!\nFoxy: Za tę minę. Stoisz nad martwym robotem jak nad grobem matki. Skończ histerię.\nFoxy: Jest, jak jest. System przestał działać. Nie ma sieci, nie ma państw, nie ma nikogo, kto powie ci, co robić.\n> Ktoś musi coś wiedzieć. Rząd, wojsko...\nFoxy: Resztki rządów próbują poskładać ten świat do kupy. Chcą nadawać sygnał radiowy i zbierać ludzi w jednym miejscu. Tak słyszałam.\nFoxy: Ale to potem. Widzisz te śmietniki? Szczury. Zmutowane. Nikt nie sprząta, więc się zalęgły. Za tydzień wejdą ludziom do mieszkań.\n* Wciska ci w ręce maczetę. Ostrze jest wyszczerbione, ale ostre.\nFoxy: Nie mamy czasu. Bierz tę cholerną maczetę i wybijmy je, zanim się na dobre rozpanoszą. Potem pomyślimy.\nFoxy: A... masz jakieś konserwy?\n> Chyba... coś mam.\nFoxy: Świetnie. Podzielisz się później. Ruchy!",
+        "give": [
+          {
+            "code": "maczeta",
+            "quantity": 1
+          }
+        ]
+      },
+      {
         "type": "KILL",
         "target": "szczur-zmutowany",
         "count": 6,
-        "text": "Nieznajomy uciekł w stronę śmietników. Przebij się przez zmutowane szczury."
+        "text": "Wybij z Foxy zmutowane szczury przy śmietnikach."
+      },
+      {
+        "type": "TALK",
+        "target": "foxy",
+        "text": "Wróć do Foxy.",
+        "dialog": "Foxy: No. Nie było tak źle, co?\n* Wyciera ostrze o spodnie i pierwszy raz się uśmiecha.\n> Kim ty w ogóle jesteś?\nFoxy: Foxy. Mieszkam dwie klatki dalej. A ty jesteś ten, co od tygodnia nie wychodził z domu.\n* Pokazujesz jej płytkę z robota i opowiadasz o mężczyźnie w płaszczu. Foxy przestaje się uśmiechać.\nFoxy: Nie wiem, kto to. Ale widziałam już takich. Zawsze kręcą się przy maszynach.\nFoxy: Zaułkiem za śmietnikami dojdziesz do Osady Reboot. Ludzie zbierają się tam przy starym odbiorniku. Zenon będzie wiedział więcej niż ja.\nFoxy: Idź. Ja tu jeszcze posprzątam. I nie zjedz wszystkich konserw."
       },
       {
         "type": "VISIT",
@@ -53,7 +71,7 @@
         "type": "TALK",
         "target": "soltys-zenon",
         "text": "Zaułek prowadzi do Osady Reboot. Pokaż płytkę komuś, kto może wiedzieć więcej.",
-        "dialog": "* Pokazujesz Zenonowi płytkę. Długo obraca ją w palcach.\nSołtys Zenon: Skąd to masz?\n> Z robota na moim podwórzu. Wykręcał je jakiś człowiek w płaszczu. Uciekł, kiedy mnie zobaczył.\nSołtys Zenon: Nie ty pierwszy go widziałeś. Od dnia burzy ktoś chodzi po mieście i otwiera maszyny. Zawsze zabiera tylko to.\n* Zielony punkt na krawędzi płytki mruga raz, potem gaśnie.\nSołtys Zenon: Zatrzymaj ją. I jeśli spotkasz go znowu — nie podchodź sam."
+        "dialog": "* Pokazujesz Zenonowi płytkę. Długo obraca ją w palcach.\nSołtys Zenon: Skąd to masz?\n> Z robota na moim podwórzu. Wykręcał je jakiś człowiek w płaszczu. Uciekł, kiedy mnie zobaczył.\nSołtys Zenon: Nie ty pierwszy go widziałeś. Od dnia burzy ktoś chodzi po mieście i otwiera maszyny. Zawsze zabiera tylko to.\n* Zielony punkt na krawędzi płytki mruga raz, potem gaśnie.\nSołtys Zenon: Od trzech dni łapiemy na starym odbiorniku sygnał. Ktoś nadaje godzinę i miejsce zbiórki. Ludzie zaczynają przychodzić.\nSołtys Zenon: Zatrzymaj tę płytkę. I jeśli spotkasz go znowu — nie podchodź sam."
       }
     ],
     "rewards": {

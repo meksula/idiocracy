@@ -97,8 +97,10 @@ Startowo: mieszkanie gracza, Podwórze kamienicy, Osada Reboot i Ruiny Galerii H
 
 **Początek gry — „Cisza po burzy”**: postać budzi się we własnym mieszkaniu dziewięć dni po burzy.
 Na podwórzu leżą martwe roboty serwisowe, a między nimi zakapturzony mężczyzna wykręca z nich płytki.
-Po krótkiej rozmowie ucieka między śmietniki, gdzie zalęgły się zmutowane szczury (poziom 1).
-Trop prowadzi do Osady Reboot.
+Po krótkiej rozmowie ucieka między śmietniki. Zanim ruszysz za nim, dopada cię Foxy — dwudziestoletnia
+sąsiadka z dwóch klatek dalej — wali w łeb, każe skończyć histerię, tłumaczy, że państwa upadły,
+a resztki rządów próbują zbierać ludzi sygnałem radiowym, wciska maczetę i razem czyścicie śmietnik
+z zmutowanych szczurów (poziom 1). Trop prowadzi do Osady Reboot i starego odbiornika radiowego.
 
 Seeder dodaje elementy, których kodu nie ma w bazie, i niczego nie nadpisuje — nowa treść z kolejnych
 wersji trafia do istniejących baz, a zmiany z edytora są bezpieczne.
@@ -115,6 +117,6 @@ Test integracyjny przechodzi pełną ścieżkę: rejestracja → postać → Web
 
 ## Dalej
 
-Architektura i protokół: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Naturalne kolejne kroki:
+Architektura i protokół: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Dokument projektowy gry (do uzupełniania): [docs/GDD.md](docs/GDD.md). Naturalne kolejne kroki:
 umiejętności klas (np. Intelekt dla Bibliotekarza), walka dystansowa (Kurier), sklepy NPC za c-coiny,
 przedmioty leżące na mapie, handel między graczami, drużyny, kanały czatu, lore.

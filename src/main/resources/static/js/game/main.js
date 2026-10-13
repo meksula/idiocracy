@@ -11,7 +11,7 @@ const KEYMAP = {
 };
 const TALK_RANGE = 2;
 const BUBBLE_MS = 5000;
-const FLOAT_MS = 1000;
+const FLOAT_MS = 1200;
 const FLEE_TILES = 7;
 const FLEE_STEP_MS = 115;
 
@@ -32,6 +32,7 @@ class Game {
     this.monsters = new Map();
     this.ghosts = [];
     this.pendingFlee = [];
+    this.pendingRuns = [];
     this.floats = [];
     this.target = null;
     this.me = null;
@@ -222,6 +223,7 @@ class Game {
     this.setMonsters(m.monsters || []);
     this.ghosts = [];
     this.pendingFlee = [];
+    this.pendingRuns = [];
     this.floats = [];
     this.me = this.entity(m.you);
     this.marks = m.marks || {};
@@ -244,10 +246,21 @@ class Game {
     if (this.target && !this.monsters.has(this.target)) this.setTarget(null, false);
   }
 
-  /** NPC, ktorzy znikneli z listy (np. uciekli w ramach misji), odbiegaja z ekranu. */
+  /**
+   * Zmiany NPC w ramach misji: kto zniknal - odbiega, kto sie pojawil z "arrive" - przybiega
+   * (i moze sam zagadac), kto zmienil miejsce - przechodzi. Animacje ruszaja po zamknieciu dialogu.
+   */
   updateNpcs(npcs) {
-    const now = new Set(npcs.map(n => n.code));
-    for (const n of this.map.npcs) if (!now.has(n.code)) this.pendingFlee.push(n);
+    const before = new Map(this.map.npcs.map(n => [n.code, n]));
+    const after = new Set(npcs.map(n => n.code));
+    for (const n of this.map.npcs) if (!after.has(n.code)) this.pendingFlee.push(n);
+    for (const n of npcs) {
+      const old = before.get(n.code);
+      const from = n.arrive && !old ? n.arrive : old && (old.x !== n.x || old.y !== n.y) ? { x: old.x, y: old.y } : n.arrive;
+      if (!from || (from.x === n.x && from.y === n.y)) continue;
+      n.hidden = true;
+      this.pendingRuns.push({ npc: n, from, autoTalk: !!n.autoTalk, standIn: old });
+    }
     this.map.npcs = npcs;
     this.npcPos = new Map(npcs.map(n => [`${n.x},${n.y}`, n]));
     if (!this.hud.dialogOpen) this.releaseFlee();
@@ -271,7 +284,36 @@ class Game {
       }
       this.ghosts.push({ kind: 'flee', e: n, points, start: t, until: t + dirs.length * FLEE_STEP_MS });
     }
+    const delay = this.pendingFlee.length ? 600 : 0;
     this.pendingFlee = [];
+    for (const r of this.pendingRuns) this.startRun(r, t + delay);
+    this.pendingRuns = [];
+  }
+
+  /** NPC przebiega (A*) z punktu from na swoje nowe miejsce; po dobiegnieciu moze zaczac rozmowe. */
+  startRun(run, start) {
+    const n = run.npc;
+    const dirs = findPath(run.from.x, run.from.y, n.x, n.y, (a, b) => this.tileFree(a, b), { maxNodes: 3000 }) || [];
+    const points = [{ x: run.from.x, y: run.from.y, dir: dirs[0] || n.dir }];
+    for (const d of dirs) {
+      const last = points[points.length - 1];
+      points.push({ x: last.x + DELTA[d][0], y: last.y + DELTA[d][1], dir: d });
+    }
+    if (points.length < 2) points.push({ x: n.x, y: n.y, dir: n.dir });
+    const until = start + (points.length - 1) * FLEE_STEP_MS;
+    this.ghosts.push({
+      kind: 'run', e: n, points, start, until, wait: run.standIn,
+      onDone: () => {
+        n.hidden = false;
+        const last = points[points.length - 1];
+        n.dir = last.dir;
+        if (run.autoTalk && this.map.npcs.includes(n)) {
+          const dx = this.me.x - n.x, dy = this.me.y - n.y;
+          n.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'E' : 'W') : (dy > 0 ? 'S' : 'N');
+          this.tryTalk(n);
+        }
+      },
+    });
   }
 
   applySelf(you) {
@@ -298,10 +340,14 @@ class Game {
     e.hp = m.hp;
     e.maxHp = m.maxHp;
     e.hitAt = now;
-    const mine = m.kind === 'p' && m.id === this.me.id;
+    const hurtMe = m.kind === 'p' && m.id === this.me.id;
+    const byMe = m.kind === 'm' && m.from === this.me.id;
     const pos = this.renderPos(e, now);
-    this.floats.push({ x: pos.x, y: pos.y, text: `-${m.dmg}`, color: mine ? 'X' : 'y', start: now });
-    if (mine && this.self) { this.self.hp = m.hp; this.self.maxHp = m.maxHp; this.hud.renderSelf(); }
+    this.floats.push({
+      x: pos.x, y: pos.y, text: `${m.dmg}`, start: now, dx: (Math.random() - 0.5) * 0.5,
+      color: hurtMe ? 'X' : byMe ? 'y' : '5', big: byMe || hurtMe,
+    });
+    if (hurtMe && this.self) { this.self.hp = m.hp; this.self.maxHp = m.maxHp; this.hud.renderSelf(); }
     if (m.kind === 'm' && m.id === this.target) this.hud.renderTarget();
   }
 
@@ -401,7 +447,11 @@ class Game {
       if (dir) this.step(dir, now);
       else if (this.pendingTalk && !this.path.length) this.tryTalk(this.pendingTalk);
     }
-    this.ghosts = this.ghosts.filter(g => g.until > now);
+    this.ghosts = this.ghosts.filter(g => {
+      if (g.until > now) return true;
+      g.onDone?.();
+      return false;
+    });
     this.floats = this.floats.filter(f => now - f.start < FLOAT_MS);
     try {
       this.renderer.draw(now);

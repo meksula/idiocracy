@@ -222,6 +222,9 @@ public class WorldService {
     void transfer(OnlinePlayer p, GameMap target, int x, int y) {
         removeFromInstance(p);
         synchronized (p) {
+            if (!target.getCode().equals(p.mapCode)) {
+                p.npcOverrides.clear();
+            }
             place(p, target, x, y);
             p.positionDirty = true;
             p.targetMonsterId = null;
@@ -310,7 +313,7 @@ public class WorldService {
     }
 
     private Npc nearbyNpc(OnlinePlayer p, String npcCode) {
-        Npc npc = content.npc(npcCode).filter(n -> quests.isVisible(p, n))
+        Npc npc = content.npc(npcCode).filter(n -> quests.isVisible(p, n)).map(n -> quests.locate(p, n))
                 .orElseThrow(() -> GameException.badRequest("Nie ma takiej osoby"));
         if (!npc.getMapCode().equals(p.mapCode)
                 || Math.max(Math.abs(npc.getX() - p.x), Math.abs(npc.getY() - p.y)) > QuestEngine.TALK_DISTANCE) {
@@ -490,8 +493,7 @@ public class WorldService {
     }
 
     private Map<String, Object> mapPayload(GameMap map, OnlinePlayer p) {
-        List<Map<String, Object>> npcs = quests.visibleNpcs(p, map.getCode()).stream()
-                .map(QuestEngine::npcView).toList();
+        List<Map<String, Object>> npcs = quests.npcViews(p, map.getCode());
         return Msg.of("map", "code", map.getCode(), "name", map.getName(), "width", map.getWidth(),
                 "height", map.getHeight(), "ground", map.getLayers().ground(), "objects", map.getLayers().objects(),
                 "portals", map.getPortals(), "spawn", Map.of("x", map.getSpawnX(), "y", map.getSpawnY()),

@@ -111,7 +111,20 @@ class GameFlowIT {
         JsonNode dialog = await(inbox, "dialog");
         assertThat(dialog.get("lines").toString()).contains("Nie podchodź");
         JsonNode npcs = await(inbox, "npcs");
-        assertThat(npcs.get("npcs").toString()).doesNotContain("nieznajomy");
+        assertThat(npcs.get("npcs").toString()).doesNotContain("nieznajomy").contains("foxy").contains("arrive");
+        JsonNode foxy = null;
+        for (JsonNode n : npcs.get("npcs")) {
+            if (n.path("code").asText().equals("foxy")) {
+                foxy = n;
+            }
+        }
+        // Foxy podbiega do gracza (11,9) i sama zagaduje
+        assertThat(Math.max(Math.abs(foxy.get("x").asInt() - 11), Math.abs(foxy.get("y").asInt() - 9))).isEqualTo(1);
+        assertThat(foxy.get("autoTalk").asBoolean()).isTrue();
+        inbox.removeIf(m -> m.path("t").asText().equals("inventory") || m.path("t").asText().equals("quests"));
+        send(ws, Map.of("t", "talk", "npc", "foxy"));
+        assertThat(await(inbox, "dialog").get("lines").toString()).contains("histerię");
+        assertThat(await(inbox, "inventory").toString()).contains("maczeta");
         assertThat(await(inbox, "quests").toString()).contains("KILL");
 
         // dwa kroki naraz: drugi za szybko -> korekta serwera

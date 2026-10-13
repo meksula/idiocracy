@@ -45,6 +45,8 @@ public class OnlinePlayer {
     StatsCalculator.Derived derived;
     Appearance appearance;
     final Map<String, CharacterQuest> quests = new ConcurrentHashMap<>();
+    /** Pozycje NPC, ktore podbiegly do tego gracza (tylko w pamieci). */
+    final Map<String, int[]> npcOverrides = new ConcurrentHashMap<>();
 
     OnlinePlayer(long characterId, long accountId, String name, String raceCode, String classCode,
                  Appearance ownAppearance, WebSocketSession session) {

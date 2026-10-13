@@ -898,5 +898,50 @@
     ]
    ]
   }
+ },
+ {
+  "stackable": false,
+  "minLevel": 1,
+  "wearColor": null,
+  "slot": "WEAPON",
+  "code": "maczeta",
+  "name": "Maczeta",
+  "type": "WEAPON",
+  "rarity": "UNCOMMON",
+  "description": "Wyszczerbiona, ale ostra. Foxy twierdzi, że to najlepsze narzędzie do rozmów ze szczurami.",
+  "stats": {
+   "strength": 1,
+   "agility": 0,
+   "vitality": 0,
+   "intellect": 0,
+   "attack": 6,
+   "defense": 0,
+   "heal": 0
+  },
+  "price": 25,
+  "icon": {
+   "w": 16,
+   "h": 16,
+   "frames": [
+    [
+     "................",
+     ".............00.",
+     "............0560",
+     "...........05640",
+     "..........053440",
+     ".........056440.",
+     "........056440..",
+     ".......053440...",
+     "......056440....",
+     ".....056440.....",
+     "....0b6440......",
+     "...0B0440.......",
+     "..0b0r00........",
+     ".0b0r0..........",
+     "..0r0...........",
+     "...0............"
+    ]
+   ]
+  }
  }
 ]

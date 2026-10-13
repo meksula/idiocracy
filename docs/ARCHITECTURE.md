@@ -81,9 +81,13 @@ bo zapisują do bazy.
 
 ## Widoczność NPC
 
-`npc.visibility = {quest, fromStep, toStep, fleeX, fleeY}` — NPC istnieje dla gracza tylko na danym
+`npc.visibility = {quest, fromStep, toStep, fleeX, fleeY, approach}` — NPC istnieje dla gracza tylko na danym
 etapie misji (kolizje, rozmowa, markery). Gdy przestaje być widoczny, klient dostaje `npcs` bez niego
 i odgrywa ucieczkę do `fleeX/fleeY` (A*) po zamknięciu okna rozmowy.
+
+`approach: true` — gdy NPC jest celem bieżącego kroku TALK, serwer stawia go na wolnym polu obok
+gracza (pozycja tylko dla tego gracza, w pamięci), a klient pokazuje, jak przybiega ze swojego
+miejsca i sam zaczyna rozmowę (`autoTalk`). Po rozmowie NPC wraca na swoje miejsce.
 
 ## Silnik misji
 

@@ -91,16 +91,19 @@ export class Renderer {
     }
     // 4. obiekty + postacie, rzad po rzedzie (prosty y-sort)
     const ents = [];
-    for (const n of map.npcs) ents.push({ kind: 'npc', e: n, x: n.x, y: n.y });
+    for (const n of map.npcs) if (!n.hidden) ents.push({ kind: 'npc', e: n, x: n.x, y: n.y });
+    for (const r of game.pendingRuns) if (r.standIn) ents.push({ kind: 'ghost', e: r.standIn, x: r.standIn.x, y: r.standIn.y, alpha: 1, frame: 0 });
     for (const mo of game.monsters.values()) { const r = game.renderPos(mo, now); ents.push({ kind: 'monster', e: mo, ...r }); }
     for (const n of game.pendingFlee) ents.push({ kind: 'ghost', e: n, x: n.x, y: n.y, alpha: 1, frame: 0 });
     for (const gh of game.ghosts) {
-      if (gh.kind === 'flee') {
+      if (gh.kind === 'run' && now < gh.start) {
+        if (gh.wait) ents.push({ kind: 'ghost', e: gh.wait, x: gh.wait.x, y: gh.wait.y, alpha: 1, frame: 0 });
+      } else if (gh.kind === 'flee' || gh.kind === 'run') {
         const t = Math.max(0, Math.min(1, (now - gh.start) / (gh.until - gh.start)));
         const f = t * (gh.points.length - 1);
         const i = Math.min(gh.points.length - 2, Math.floor(f));
         const a = gh.points[i], b = gh.points[i + 1], k = f - i;
-        const alpha = t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3;
+        const alpha = gh.kind === 'run' || t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3;
         ents.push({ kind: 'ghost', e: { ...gh.e, dir: b.dir }, x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, alpha, frame: Math.floor(now / 90) % 2 ? 1 : 2 });
       } else {
         ents.push({ kind: 'corpse', e: gh.e, x: gh.e.x, y: gh.e.y, alpha: Math.min(1, 1 - (now - gh.start) / (gh.until - gh.start)) });
@@ -201,7 +204,7 @@ export class Renderer {
     if (en.kind === 'monster' && (hurt || targeted || hovered)) this.drawHpBar(px, py + 2, e.hp, e.maxHp);
     else if ((en.kind === 'me' || en.kind === 'player') && hurt) this.drawHpBar(px, py + 2, e.hp, e.maxHp);
     const quiet = en.kind === 'npc' || en.kind === 'monster';
-    if (!quiet || hovered || targeted || this.game.showNames) {
+    if (!quiet || hovered || this.game.showNames) {
       ctx.strokeText(label, px, py);
       ctx.fillText(label, px, py);
     }
@@ -231,17 +234,20 @@ export class Renderer {
     ctx.fillRect(x, y, Math.round(w * f), h);
   }
 
+  /** Liczby obrazen: wyskakuja nad glowa celu, unosza sie i zanikaja. */
   drawFloats(now) {
     const { ctx } = this;
-    ctx.font = '22px VT323, monospace';
     ctx.textAlign = 'center';
-    ctx.lineWidth = 3;
     ctx.strokeStyle = '#000';
     for (const f of this.game.floats) {
-      const t = (now - f.start) / 1000;
-      const x = f.x * this.ts - this.cam.x + this.ts / 2;
-      const y = f.y * this.ts - this.cam.y + this.ts / 3 - t * this.ts * 0.8;
-      ctx.globalAlpha = Math.max(0, 1 - t * t);
+      const t = (now - f.start) / 1200;
+      const pop = t < 0.12 ? 0.6 + (t / 0.12) * 0.6 : t < 0.25 ? 1.2 - ((t - 0.12) / 0.13) * 0.2 : 1;
+      const size = Math.round((f.big ? 30 : 22) * pop);
+      const x = (f.x + f.dx) * this.ts - this.cam.x + this.ts / 2;
+      const y = f.y * this.ts - this.cam.y - this.scale * 2 - t * this.ts * 0.9;
+      ctx.font = `${size}px Silkscreen, VT323, monospace`;
+      ctx.lineWidth = Math.max(3, size / 6);
+      ctx.globalAlpha = t < 0.55 ? 1 : Math.max(0, 1 - (t - 0.55) / 0.45);
       ctx.fillStyle = PALETTE[f.color] || PALETTE.y;
       ctx.strokeText(f.text, x, y);
       ctx.fillText(f.text, x, y);

@@ -28,6 +28,21 @@ public class Npc implements ContentEntity {
     @Column(columnDefinition = "jsonb")
     private NpcVisibility visibility;
 
+    /** Kopia NPC w innym miejscu (np. gdy podbiegl do konkretnego gracza). */
+    public Npc at(int nx, int ny) {
+        Npc n = new Npc();
+        n.code = code;
+        n.name = name;
+        n.mapCode = mapCode;
+        n.x = nx;
+        n.y = ny;
+        n.appearance = appearance;
+        n.greeting = greeting;
+        n.dir = dir;
+        n.visibility = visibility;
+        return n;
+    }
+
     @Override
     public void validate() {
         ContentEntity.super.validate();

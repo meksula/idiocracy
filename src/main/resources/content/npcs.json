@@ -86,5 +86,30 @@
       "fleeX": 26,
       "fleeY": 15
     }
+  },
+  {
+    "code": "foxy",
+    "name": "Foxy",
+    "mapCode": "podworze",
+    "x": 20,
+    "y": 14,
+    "dir": "E",
+    "appearance": {
+      "skin": "s",
+      "hair": "o",
+      "eyes": "G",
+      "primary": "g",
+      "secondary": "1",
+      "feet": "b"
+    },
+    "greeting": "Foxy: Gadać będziemy potem. Szczury same się nie wybiją.",
+    "visibility": {
+      "quest": "cisza-po-burzy",
+      "fromStep": 2,
+      "toStep": 4,
+      "fleeX": 26,
+      "fleeY": 14,
+      "approach": true
+    }
   }
 ]
